@@ -11,14 +11,6 @@ module.exports = {
         let texto = "";
 
 
-        for (listaRaridade in emojis) {
-            texto += `# **${listaRaridade.toUpperCase()}**\n`
-            for (nomeEmoji in emojis[listaRaridade]) {
-                let quantidade = emojis[listaRaridade][nomeEmoji]
-                texto += `${nomeEmoji}: ${quantidade}\n`
-            }
-        }
-
 
 
 
