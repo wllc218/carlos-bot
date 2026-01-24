@@ -1,5 +1,8 @@
 let soma = 1;
 let totalEmojis = 0;
+
+
+
 const emojis = {
   comum: {
     benicio: 0,
