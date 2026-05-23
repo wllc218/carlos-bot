@@ -25,7 +25,7 @@ module.exports = {
 
 
         const embed = new EmbedBuilder()
-            .setTitle(`🎮 VOCÊ IRÁ JOGAR: ${jogo.name}\n`)
+            .setTitle(`🎮 ${jogo.name}\n`)
             .setDescription(`LANÇOU EM: **${jogo.released}**
                 PLATAFORMA: ${plataformas}
                 RATING: ${"⭐".repeat(Math.floor(jogo.rating))} (${jogo.rating != 0 ? jogo.rating : "SEM INFORMAÇÕES"}) 
