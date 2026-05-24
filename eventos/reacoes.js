@@ -19,7 +19,7 @@ module.exports = {
             "<:dsd:1505684509591339208>": ["HAHAHA", "HAH"],
             "<:oi:1390108899863957747>": ["bosta", "bosta", "bostas", "bostinha", "bostinhas", "bostola", "bostolas", "bostão",
                 "bostoes", "bostões", "embostado", "embostada", "bostear", "bostejar", "bostejando", "bostejo", "bostuda", "bostudo", 
-                "merda", "merdas", "merdinha", "merdola"],
+                "merda", "merdas", "merdinha", "merdola", "caguei", "cagando", "cagou"],
         };
 
         const texto = message.content.toLowerCase();
