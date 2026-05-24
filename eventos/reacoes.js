@@ -23,7 +23,7 @@ module.exports = {
             "<:oi:1390108899863957747>": ["bosta", "bosta", "bostas", "bostinha", "bostinhas", "bostola", "bostolas", "bostão",
                 "bostoes", "bostões", "embostado", "embostada", "bostear", "bostejar", "bostejando", "bostejo", "bostuda", "bostudo", 
                 "merda", "merdas", "merdinha", "merdola", "caguei", "cagando", "cagou", "cagar"],
-            "<:sisycus:1481109255355367455>": ["YES"]
+            "<:sisycus:1481109255355367455>": ["YES[S]*"]
         };
 
         const texto = message.content.toLowerCase();
