@@ -1,13 +1,17 @@
-const respostas = ["HAH[AH]*"]
-
-
 module.exports = {
     name: "teste",
-    execute(message, args) {
-        if (!args.length) {
-            return message.reply("ESCREVE ALGUMA COISA PORR");
+    async execute(message) {
+        let risada = "HAH"; 
+
+        const tamanhoAleatorio = Math.floor(Math.random() * 21) + 5; 
+
+        const letras = ["A", "H"];
+
+        for (let i = 0; i < tamanhoAleatorio; i++) {
+            const letraSorteada = letras[Math.floor(Math.random() * letras.length)];
+            risada += letraSorteada;
         }
-        const sorte = Math.floor(Math.random() * respostas.length);
-        message.reply(respostas[sorte]);
+
+        await message.reply(risada);
     }
 }
