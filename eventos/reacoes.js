@@ -8,14 +8,16 @@ module.exports = {
         if (message.author.bot) return;
 
         const reacoes = {
-            "<:rob:1390110593721040966>": ["nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto"],
-            "<:Lucas:1390114953582870833>": ["lucas", "prjooj", "luque"],
-            "<:wallace:1390110948127146086>": ["wallace", "walface", "cabeça"],
-            "<:carlos:1390110742971289632>": ["carlos", "deyvid"],
+            "<:rob:1390110593721040966>": ["nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto", "4"],
+            "<:Lucas:1390114953582870833>": ["lucas", "prjooj", "luque", "3"],
+            "<:wallace:1390110948127146086>": ["wallace", "walface", "cabeça", "2"],
+            "<:carlos:1390110742971289632>": ["carlos", "deyvid", "1"],
             "<:theo:1390110538993766421>": ["theo"],
-            "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", "nossas"],
+            "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", "nossas", "5"],
             "<:vagina:1390109875089965228>": ["regina", "vagina"],
-            "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES", "HAH[AH]*"],
+            "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES", "HAH[AH]*",
+                "TAKE", "CAPUHA", "PAPUHA", "PREPARE FOR", "NIGGARLAS"
+            ],
             "<:dsd:1505684509591339208>": ["HAH[AH]*"],
             "<:oi:1390108899863957747>": ["bosta", "bosta", "bostas", "bostinha", "bostinhas", "bostola", "bostolas", "bostão",
                 "bostoes", "bostões", "embostado", "embostada", "bostear", "bostejar", "bostejando", "bostejo", "bostuda", "bostudo", 
