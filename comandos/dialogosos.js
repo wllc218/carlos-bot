@@ -1,4 +1,4 @@
-const dialogos = require('../dialogos.json'); // Ajuste o caminho se o JSON estiver na pasta principal
+const dialogos = require('./dialoguess.json'); // Ajuste o caminho se o JSON estiver na pasta principal
 
 // Se você usa o Commando Handler que exporta o "run" ou "execute":
 module.exports = {
