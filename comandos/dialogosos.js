@@ -1,15 +1,13 @@
-const blocosDeDialogo = require('./dialogos.json');
+const dialogos = require('../dialogos.json'); // Ajuste o caminho se o JSON estiver na pasta principal
 
-client.on('messageCreate', async (message) => {
-    if (message.author.bot || !message.content.startsWith('C!')) return;
+// Se você usa o Commando Handler que exporta o "run" ou "execute":
+module.exports = {
+    name: 'dialog',
+    async execute(message) {
+        // Escolhe o bloco e a frase de forma limpa
+        const bloco = dialogos[Math.floor(Math.random() * dialogos.length)];
+        const frase = bloco.frases[Math.floor(Math.random() * bloco.frases.length)];
 
-    const args = message.content.slice('C!'.length).trim().split(/+/);
-    const command = args.shift().toLowerCase();
-
-    if (command === 'dialog') {
-        const blocoAleatorio = blocosDeDialogo[Math.floor(Math.random() * blocosDeDialogo.length)];
-        const fraseAleatoria = blocoAleatorio.frases[Math.floor(Math.random() * blocoAleatorio.frases.length)];
-
-        await message.channel.send(`${fraseAleatoria}\n\n*Fonte: ${blocoAleatorio.nome}*`);
+        await message.channel.send(`${frase}\n\n*Fonte: ${bloco.nome}*`);
     }
-});
+};
