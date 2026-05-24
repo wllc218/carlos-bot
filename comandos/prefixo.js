@@ -1,9 +1,8 @@
-import { prefix } from "../config.json";
 
 module.exports = {
-    name: "prefixo",
+    name: "haha",
     execute(message) {
-        message.reply(`O prefixo atual é: ${prefix}`);
+        message.reply(`peidei`);
         
     }
 }
