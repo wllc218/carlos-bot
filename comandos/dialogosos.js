@@ -1,13 +1,97 @@
-const dialogos = require('../dialogos.json'); // Voltei para "../" considerando que está na pasta de comandos, mude o nome do arquivo se necessário!
+const dialogos = require('./dialoguess.json');
+const { EmbedBuilder } = require("discord.js");
+
+let jogoAtivo = false;
 
 module.exports = {
     name: 'dialog',
+
     async execute(message) {
-        // Escolhe o bloco e a frase de forma limpa
+
+        if (jogoAtivo) {
+            return message.reply("PERA Q JA MANDARAM O COMANDO ESPERA ACABA");
+        }
+
+        jogoAtivo = true;
+
         const bloco = dialogos[Math.floor(Math.random() * dialogos.length)];
         const frase = bloco.frases[Math.floor(Math.random() * bloco.frases.length)];
 
-        // Envia apenas a frase sorteada
-        await message.channel.send(`${frase}`);
+        let tentativas = 3;
+
+        message.channel.send(frase);
+
+        const collector = message.channel.createMessageCollector({
+            time: 15000
+        });
+
+        collector.on("collect", (msg) => {
+
+            if (msg.author.bot) return;
+
+            let resposta = msg.content
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, " ")
+                .trim();
+
+            let nomeObra = bloco.nome
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, " ")
+                .trim();
+
+            // ACERTOU
+            if (resposta === nomeObra) {
+
+                const final = new EmbedBuilder()
+                    .setTitle(bloco.nome)
+                    .setDescription(`### ${msg.author} ACERTOU 🎊🎊🎊`)
+                    .setColor("#80ef80");
+
+                if (bloco.thumb) {
+                    final.setThumbnail(bloco.thumb);
+                }
+
+                message.channel.send({ embeds: [final] });
+
+                jogoAtivo = false;
+
+                collector.stop();
+
+                return;
+            }
+
+            // ERROU
+            tentativas--;
+
+            // PERDEU
+            if (tentativas <= 0) {
+
+                const final = new EmbedBuilder()
+                    .setTitle(bloco.nome)
+                    .setDescription(`### BURROU.\nERA **${bloco.nome}**`)
+                    .setColor("#ef8080");
+
+                if (bloco.thumb) {
+                    final.setThumbnail(bloco.thumb);
+                }
+
+                message.channel.send({ embeds: [final] });
+
+                jogoAtivo = false;
+
+                collector.stop();
+
+                return;
+            }
+
+            // ainda tem chances
+            message.channel.send(`### ERROU MAIS ${tentativas} CHANCE`);
+
+        });
+
+        collector.on("end", () => {
+            jogoAtivo = false;
+        });
+
     }
 };
