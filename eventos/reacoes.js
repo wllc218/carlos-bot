@@ -8,12 +8,13 @@ module.exports = {
         if (message.author.bot) return;
 
         const reacoes = {
-            "<:rob:1390110593721040966>": ["nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto", "4"],
-            "<:Lucas:1390114953582870833>": ["lucas", "prjooj", "luque", "3"],
-            "<:wallace:1390110948127146086>": ["wallace", "walface", "cabeça", "2"],
-            "<:carlos:1390110742971289632>": ["carlos", "deyvid", "1"],
+            "<:rob:1390110593721040966>": ["nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto", "4", "quatro"],
+            "<:Lucas:1390114953582870833>": ["lucas", "prjooj", "luque", "3", "três"],
+            "<:wallace:1390110948127146086>": ["wallace", "walface", "cabeça", "2", "dois"],
+            "<:carlos:1390110742971289632>": ["carlos", "deyvid", "1", "um"],
             "<:theo:1390110538993766421>": ["theo"],
-            "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", "nossas", "5"],
+            "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", 
+                "nossas", "5", "cinco"],
             "<:vagina:1390109875089965228>": ["regina", "vagina"],
             "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES", "HAH[AH]*",
                 "TAKE", "CAPUHA", "PAPUHA", "PREPARE FOR", "NIGGARLAS"
