@@ -43,7 +43,13 @@ const respostas = ["oi tudo bem",
     "EU VO LE PEGA FI DE RAPARIGA",
     "MENTIRA",
     "fiquei sabendo dumas parada ai.",
-    "ola tudo bem"]
+    "ola tudo bem",
+    "TAKE THIS",
+    "TAKE THAT",
+    "LETS DO THIS",
+    "YES",
+    "HAH[AH]*",
+]
 
 
 module.exports = {
