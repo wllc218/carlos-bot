@@ -15,8 +15,8 @@ module.exports = {
             "<:theo:1390110538993766421>": ["theo"],
             "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente"],
             "<:vagina:1390109875089965228>": ["regina"],
-            "<:oie:1497972408391434462>": ["ele", "eles"],
-            "<:dsd:1505684509591339208>": ["HAHAHA"]
+            "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "HAH"],
+            "<:dsd:1505684509591339208>": ["HAHAHA", "HAH"]
         };
 
         const texto = message.content.toLowerCase();
