@@ -2,72 +2,82 @@
     "emojis": [
         {
             "id": 0,
-            "nome": "lorax",
+            "nome": "Lorax",
             "raridade": "comum",
             "discordId": "1431749216476336168",
+            "discordName": "",
             "contador": 0
         },
         {
             "id": 1,
-            "nome": "ellie",
+            "nome": "Ellie",
             "raridade": "comum",
             "discordId": "1437135166312026305",
+            "discordName": "ne",
             "contador": 0
         },
         {
             "id": 2,
-            "nome": "cachorro",
+            "nome": "",
             "raridade": "comum",
             "discordId": "1441182434950385674",
+            "discordName": "benicio",
             "contador": 0
         },
         {
             "id": 3,
-            "nome": "benicio",
+            "nome": "Benicio",
             "raridade": "comum",
             "discordId": "1441181952114823289",
+            "discordName": "",
             "contador": 0
         },
         {
             "id": 4,
-            "nome": "blue",
+            "nome": "",
             "raridade": "raro",
             "discordId": "1390105755423739935",
+            "discordName": "",
             "contador": 0
         },
         {
             "id": 5,
-            "nome": "deku",
+            "nome": "Deku",
             "raridade": "raro",
             "discordId": "1407125652322123826",
+            "discordName": "DADDYISNTDONESP",
             "contador": 0
         },
         {
             "id": 6,
-            "nome": "johnkler",
+            "nome": "Johnkler",
             "raridade": "raro",
             "discordId": "1390104123357003806",
+            "discordName": "john_kler",
             "contador": 0
         },
         {
             "id": 7,
-            "nome": "asriel",
+            "nome": "",
             "raridade": "raro",
             "discordId": "1390106189232078984",
+            "discordName": "",
             "contador": 0
         },
         {
             "id": 8,
-            "nome": "fire in my hole",
+            "nome": "",
             "raridade": "epico",
             "discordId": "1390636933591470143",
+            "discordName": "",
             "contador": 0
         },
         {
             "id": 9,
-            "nome": "susie",
+            "nome": "",
             "raridade": "epico",
             "discordId": "1390104925635215381",
+            "discordName": "",
             "contador": 0
         },
         {
@@ -75,70 +85,79 @@
             "nome": "PIGS",
             "raridade": "epico",
             "discordId": "1438015083895591164",
+            "discordName": "pigs",
             "contador": 0
         },
         {
             "id": 11,
-            "nome": "geometry sash",
+            "nome": "Geometry sash",
             "raridade": "epico",
             "discordId": "1430594895088713858",
+            "discordName": "GOMETRYSASH",
             "contador": 0
         },
         {
             "id": 12,
-            "nome": "seisete",
+            "nome": "Seisete",
             "raridade": "mitico",
             "discordId": "1441569985674743829",
+            "discordName": "seisete",
             "contador": 0
         },
         {
             "id": 13,
-            "nome": "ainda",
+            "nome": "Ainda água",
             "raridade": "mitico",
             "discordId": "1390104307738869811",
+            "discordName": "ainda",
             "contador": 0
         },
         {
             "id": 14,
-            "nome": "pikimin",
+            "nome": "Pikimin",
             "raridade": "mitico",
             "discordId": "1168223527929917560",
+            "discordName": "emoji_27",
             "contador": 0
         },
         {
             "id": 15,
-            "nome": "senta",
+            "nome": "Senta",
             "raridade": "mitico",
             "discordId": "1227090538399006841",
+            "discordName": "",
             "contador": 0
         },
         {
             "id": 16,
-            "nome": "m&l",
+            "nome": "M&L",
             "raridade": "mitico",
             "discordId": "1175490307454935102",
+            "discordName": "tres",
             "contador": 0
         },
         {
             "id": 17,
-            "nome": "regina",
+            "nome": "Regina",
             "raridade": "lendario",
             "discordId": "1390109875089965228",
+            "discordName": "vagina",
             "contador": 0
         },
         {
             "id": 18,
-            "nome": "shappy",
+            "nome": "Shappy",
             "raridade": "lendario",
             "discordId": "1392167699857145987",
+            "discordName": "steamhave",
             "contador": 0
         },
         {
             "id": 19,
-            "nome": "menuina",
+            "nome": "Menuina",
             "raridade": "lendario",
             "discordId": "1415817551333818550",
-            "emojiId": "vocejaviuessameniuna",
+            "discordName": "vocejaviuessameniuna",
             "contador": 0
         },
         {
@@ -146,47 +165,47 @@
             "nome": "BOMBA",
             "raridade": "lendario",
             "discordId": "1167645969878352024",
-            "emojiId": "channels4_profile",
+            "discordName": "channels4_profile",
             "contador": 0
         },
         {
             "id": 21,
-            "nome": "lucas",
+            "nome": "Lucas",
             "raridade": "cromatico",
             "discordId": "1390114953582870833",
-            "emojiId": "lucas",
+            "discordName": "lucas",
             "contador": 0
         },
         {
             "id": 22,
-            "nome": "nicolas",
+            "nome": "Nicolas",
             "raridade": "cromatico",
             "discordId": "1390110593721040966",
-            "emojiId": "nicolas",
+            "discordName": "nicolas",
             "contador": 0
         },
         {
             "id": 23,
-            "nome": "wallace",
+            "nome": "Wallace",
             "raridade": "cromatico",
             "discordId": "1390110948127146086",
-            "emojiId": "wallace",
+            "discordName": "wallace",
             "contador": 0
         },
         {
             "id": 24,
-            "nome": "carlos",
+            "nome": "Carlos",
             "raridade": "cromatico",
             "discordId": "1390110742971289632",
-            "emojiId": "carlos",
+            "discordName": "carlos",
             "contador": 0
         },
         {
             "id": 25,
-            "nome": "lavinia",
+            "nome": "Lavinia",
             "raridade": "cromatico",
             "discordId": "1078845696322584706",
-            "emojiId": "unknown2",
+            "discordName": "unknown2",
             "contador": 0
         }
     ],
