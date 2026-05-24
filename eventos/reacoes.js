@@ -16,7 +16,7 @@ module.exports = {
             "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", 
                 "nossas", "5", "cinco", "five"],
             "<:vagina:1390109875089965228>": ["regina", "vagina"],
-            "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES", "HAH[AH]*",
+            "<:oie:1497972408391434462>": ["eles", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES", "HAH[AH]*",
                 "TAKE", "CAPUHA", "PAPUHA", "PREPARE FOR", "NIGGARLAS"
             ],
             "<:dsd:1505684509591339208>": ["HAH[AH]*"],
