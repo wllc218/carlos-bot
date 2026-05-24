@@ -15,8 +15,11 @@ module.exports = {
             "<:theo:1390110538993766421>": ["theo"],
             "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente"],
             "<:vagina:1390109875089965228>": ["regina"],
-            "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "HAH"],
-            "<:dsd:1505684509591339208>": ["HAHAHA", "HAH"]
+            "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES"],
+            "<:dsd:1505684509591339208>": ["HAHAHA", "HAH"],
+            "<:oi:1390108899863957747>": ["bosta", "bosta", "bostas", "bostinha", "bostinhas", "bostola", "bostolas", "bostão",
+                "bostoes", "bostões", "embostado", "embostada", "bostear", "bostejar", "bostejando", "bostejo", "bostuda", "bostudo", 
+                "merda", "merdas", "merdinha", "merdola"],
         };
 
         const texto = message.content.toLowerCase();
