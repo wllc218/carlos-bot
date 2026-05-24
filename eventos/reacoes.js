@@ -8,13 +8,13 @@ module.exports = {
         if (message.author.bot) return;
 
         const reacoes = {
-            "<:rob:1390110593721040966>": ["nicolas", "rob", "robique"],
+            "<:rob:1390110593721040966>": ["nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto"],
             "<:Lucas:1390114953582870833>": ["lucas", "prjooj", "luque"],
-            "<:wallace:1390110948127146086>": ["wallace", "walface"],
+            "<:wallace:1390110948127146086>": ["wallace", "walface", "cabeça"],
             "<:carlos:1390110742971289632>": ["carlos", "deyvid"],
             "<:theo:1390110538993766421>": ["theo"],
-            "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente"],
-            "<:vagina:1390109875089965228>": ["regina"],
+            "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", "nossas"],
+            "<:vagina:1390109875089965228>": ["regina", "vagina"],
             "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES"],
             "<:dsd:1505684509591339208>": ["HAHAHA", "HAH"],
             "<:oi:1390108899863957747>": ["bosta", "bosta", "bostas", "bostinha", "bostinhas", "bostola", "bostolas", "bostão",
