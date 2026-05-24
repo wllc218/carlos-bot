@@ -1,9 +1,9 @@
 module.exports = {
-    name: "teste",
+    name: "risa",
     async execute(message) {
         let risada = "HAH"; 
 
-        const tamanhoAleatorio = Math.floor(Math.random() * 21) + 5; 
+        const tamanhoAleatorio = Math.floor(Math.random() * 35) + 5; 
 
         const letras = ["A", "H"];
 
