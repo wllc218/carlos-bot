@@ -33,8 +33,8 @@ module.exports = {
             "<:vagina:1390109875089965228>": ["regina", "vagina", "GO GO GO GO"],
 
             //Sonic. exe
-            "<:oie:1497972408391434462>": ["ele", "eles", "ela", "elas", "TAKE THIS", "TAKE THAT", "LETS DO THIS", "YES", "HAH[AH]*",
-                "TAKE", "CAPUHA", "PAPUHA", "PREPARE FOR", "NIGGARLAS", "Sonic. exe", "Sonic", "TA[A]*KE THIS"
+            "<:oie:1497972408391434462>": [ "eles", "elas", "TA[A]*KE THA[A]*T", "LETS DO THIS", "YES", "HAH[AH]*",
+                "TAKE", "CAPUHA", "PAPUHA", "PREPARE FOR", "NIGGARLAS", "Sonic. exe", "Sonic", "TA[A]*KE THI[I]*S[S]*"
             ],
 
             //sonic.exe
