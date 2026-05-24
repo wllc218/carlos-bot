@@ -85,7 +85,7 @@ module.exports = {
             }
 
             // ainda tem chances
-            message.channel.send(`### ERROU MAIS ${tentativas} CHANCE`);
+            return message.channel.send(`### ERROU MAIS ${tentativas} CHANCE`);
 
         });
 

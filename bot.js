@@ -50,4 +50,8 @@ client.once("clientReady", (client) => {
   );
 });
 
-client.login(config.token);
+require("dotenv").config();
+
+const token = process.env.DISCORD_TOKEN;
+
+client.login(token);
