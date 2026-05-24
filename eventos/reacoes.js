@@ -10,7 +10,7 @@ module.exports = {
         const reacoes = {
             "<:rob:1390110593721040966>": ["nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto", "4", "quatro", "Four"],
             "<:Lucas:1390114953582870833>": ["lucas", "prjooj", "luque", "3", "três", "three"],
-            "<:wallace:1390110948127146086>": ["wallace", "walface", "cabeça", "2", "dois", "two"],
+            "<:wallace:1390110948127146086>": ["wallace", "walface", "cabeça", "cabeçudo", "2", "dois", "two"],
             "<:carlos:1390110742971289632>": ["carlos", "deyvid", "1", "um", "one"],
             "<:theo:1390110538993766421>": ["theo"],
             "<:vocejaviuessameniuna:1415817551333818550>": ["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", 
