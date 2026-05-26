@@ -10,7 +10,7 @@ module.exports = {
         const reacoes = {
             //nicolas
             "<:rob:1390110593721040966>": ["nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto", "4", "quatro", "Four", 
-                "negros", "n"
+                "negros"
             ],
 
             //lucas
