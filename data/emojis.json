@@ -6,6 +6,7 @@
             "raridade": "comum",
             "discordId": "1431749216476336168",
             "discordName": "",
+            "cor": "#FF6F61",
             "contador": 0
         },
         {
@@ -14,6 +15,7 @@
             "raridade": "comum",
             "discordId": "1437135166312026305",
             "discordName": "ne",
+            "cor": "#6B5B95",
             "contador": 0
         },
         {
@@ -22,6 +24,7 @@
             "raridade": "comum",
             "discordId": "1441182434950385674",
             "discordName": "benicio",
+            "cor": "#88B04B",
             "contador": 0
         },
         {
@@ -30,6 +33,7 @@
             "raridade": "comum",
             "discordId": "1441181952114823289",
             "discordName": "",
+            "cor": "#F7CAC9",
             "contador": 0
         },
         {
@@ -38,6 +42,7 @@
             "raridade": "raro",
             "discordId": "1390105755423739935",
             "discordName": "",
+            "cor": "#92A8D1",
             "contador": 0
         },
         {
@@ -46,6 +51,7 @@
             "raridade": "raro",
             "discordId": "1407125652322123826",
             "discordName": "DADDYISNTDONESP",
+            "cor": "#034F84",
             "contador": 0
         },
         {
@@ -54,6 +60,7 @@
             "raridade": "raro",
             "discordId": "1390104123357003806",
             "discordName": "john_kler",
+            "cor": "#FFB447",
             "contador": 0
         },
         {
@@ -62,6 +69,7 @@
             "raridade": "raro",
             "discordId": "1390106189232078984",
             "discordName": "",
+            "cor": "#9B2335",
             "contador": 0
         },
         {
@@ -70,6 +78,7 @@
             "raridade": "epico",
             "discordId": "1390636933591470143",
             "discordName": "",
+            "cor": "#6A4A3C",
             "contador": 0
         },
         {
@@ -78,6 +87,7 @@
             "raridade": "epico",
             "discordId": "1390104925635215381",
             "discordName": "",
+            "cor": "#2E8B57",
             "contador": 0
         },
         {
@@ -86,6 +96,7 @@
             "raridade": "epico",
             "discordId": "1438015083895591164",
             "discordName": "pigs",
+            "cor": "#FF7F50",
             "contador": 0
         },
         {
@@ -94,6 +105,7 @@
             "raridade": "epico",
             "discordId": "1430594895088713858",
             "discordName": "GOMETRYSASH",
+            "cor": "#00A4CC",
             "contador": 0
         },
         {
@@ -102,6 +114,7 @@
             "raridade": "mitico",
             "discordId": "1441569985674743829",
             "discordName": "seisete",
+            "cor": "#E94B3C",
             "contador": 0
         },
         {
@@ -110,6 +123,7 @@
             "raridade": "mitico",
             "discordId": "1390104307738869811",
             "discordName": "ainda",
+            "cor": "#7FB069",
             "contador": 0
         },
         {
@@ -118,6 +132,7 @@
             "raridade": "mitico",
             "discordId": "1168223527929917560",
             "discordName": "emoji_27",
+            "cor": "#F7786B",
             "contador": 0
         },
         {
@@ -126,6 +141,7 @@
             "raridade": "mitico",
             "discordId": "1227090538399006841",
             "discordName": "",
+            "cor": "#B565A7",
             "contador": 0
         },
         {
@@ -134,6 +150,7 @@
             "raridade": "mitico",
             "discordId": "1175490307454935102",
             "discordName": "tres",
+            "cor": "#345995",
             "contador": 0
         },
         {
@@ -142,6 +159,7 @@
             "raridade": "lendario",
             "discordId": "1390109875089965228",
             "discordName": "vagina",
+            "cor": "#E6A157",
             "contador": 0
         },
         {
@@ -150,6 +168,7 @@
             "raridade": "lendario",
             "discordId": "1392167699857145987",
             "discordName": "steamhave",
+            "cor": "#3AA17E",
             "contador": 0
         },
         {
@@ -158,6 +177,7 @@
             "raridade": "lendario",
             "discordId": "1415817551333818550",
             "discordName": "vocejaviuessameniuna",
+            "cor": "#D65076",
             "contador": 0
         },
         {
@@ -166,6 +186,7 @@
             "raridade": "lendario",
             "discordId": "1167645969878352024",
             "discordName": "channels4_profile",
+            "cor": "#0B6E4F",
             "contador": 0
         },
         {
@@ -174,6 +195,7 @@
             "raridade": "cromatico",
             "discordId": "1390114953582870833",
             "discordName": "lucas",
+            "cor": "#FF9A8B",
             "contador": 0
         },
         {
@@ -182,6 +204,7 @@
             "raridade": "cromatico",
             "discordId": "1390110593721040966",
             "discordName": "nicolas",
+            "cor": "#6C5B7B",
             "contador": 0
         },
         {
@@ -190,6 +213,7 @@
             "raridade": "cromatico",
             "discordId": "1390110948127146086",
             "discordName": "wallace",
+            "cor": "#2A9D8F",
             "contador": 0
         },
         {
@@ -198,6 +222,7 @@
             "raridade": "cromatico",
             "discordId": "1390110742971289632",
             "discordName": "carlos",
+            "cor": "#B3DE69",
             "contador": 0
         },
         {
@@ -206,6 +231,7 @@
             "raridade": "cromatico",
             "discordId": "1078845696322584706",
             "discordName": "unknown2",
+            "cor": "#845EC2",
             "contador": 0
         }
     ],

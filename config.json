@@ -1,4 +1,5 @@
 {
-    "prefix": "C!"
+    "prefix": "C!",
+    "mongoPath": "mongodb+srv://walcefa636_db_user:NpcnAdX5Aem0ExPt@cluster0.scbugea.mongodb.net/"
 }
 

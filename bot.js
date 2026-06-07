@@ -5,12 +5,11 @@ const mongoose = require("mongoose");
 
 const messageCount = require("./comandos/message-count/message-counter");
 
-
 const {
   Client,
   GatewayIntentBits,
   ActivityType,
-  Collection
+  Collection,
 } = require("discord.js");
 
 const testSchema = require("./comandos/schemas/test-schema");
@@ -23,8 +22,8 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 // =====================
@@ -35,7 +34,7 @@ client.commands = new Collection();
 
 const commandFiles = fs
   .readdirSync("./comandos")
-  .filter(file => file.endsWith(".js"));
+  .filter((file) => file.endsWith(".js"));
 
 for (const file of commandFiles) {
   const command = require(`./comandos/${file}`);
@@ -56,7 +55,7 @@ console.log(`${client.commands.size} comandos carregados.`);
 
 const eventFiles = fs
   .readdirSync("./eventos")
-  .filter(file => file.endsWith(".js"));
+  .filter((file) => file.endsWith(".js"));
 
 for (const file of eventFiles) {
   const event = require(`./eventos/${file}`);
@@ -81,18 +80,16 @@ console.log(`${eventFiles.length} eventos carregados.`);
 client.once("clientReady", async () => {
   console.log(`✅ Bot iniciado como ${client.user.tag}`);
   messageCount(client);
-  
+
   client.user.setActivity("MERDA NOS OUTROS", {
-    type: ActivityType.Playing
+    type: ActivityType.Playing,
   });
 });
-  
 
 //   try {
 //     mongoose.set("strictQuery", true);
 //     await mongoose.connect(process.env.MONGO_URL);
 //     console.log("✅ MongoDB conectado.");
-
 
 //     // TESTE MONGO
 //     setTimeout(async () => {
@@ -105,7 +102,6 @@ client.once("clientReady", async () => {
 //     console.error("Erro ao conectar MongoDB:", err);
 //   }
 
-
 // =====================
 // PREFIX COMMAND HANDLER
 // =====================
@@ -117,10 +113,7 @@ client.on("messageCreate", async (message) => {
   //se for bot morre
   if (!message.content.startsWith(prefix)) return;
 
-  const args = message.content
-    .slice(prefix.length)
-    .trim()
-    .split(/ +/);
+  const args = message.content.slice(prefix.length).trim().split(/ +/);
 
   const cmdName = args.shift().toLowerCase();
 
@@ -130,7 +123,6 @@ client.on("messageCreate", async (message) => {
 
   try {
     await command.execute(message, args, client);
-
   } catch (err) {
     console.error(err);
 
