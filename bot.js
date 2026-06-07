@@ -79,11 +79,10 @@ console.log(`${eventFiles.length} eventos carregados.`);
 
 client.once("clientReady", async () => {
   console.log(`✅ Bot iniciado como ${client.user.tag}`);
-  messageCount(client);
 
-  client.user.setActivity("MERDA NOS OUTROS", {
-    type: ActivityType.Playing,
-  });
+  console.log("Chamando messageCount");
+
+  messageCount(client);
 });
 
 //   try {
@@ -110,7 +109,7 @@ const prefix = "C!";
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  //se for bot morre
+  //se for bot mandando comando, ele nao responde
   if (!message.content.startsWith(prefix)) return;
 
   const args = message.content.slice(prefix.length).trim().split(/ +/);
@@ -126,7 +125,7 @@ client.on("messageCreate", async (message) => {
   } catch (err) {
     console.error(err);
 
-    message.reply("PORRA DEU ERRO");
+    message.reply("PORRA DEU ERRO " + err);
   }
 });
 
