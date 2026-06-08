@@ -59,7 +59,7 @@ module.exports = {
 
       //prettier-ignore
       //moça
-      "<:moca:1390104833092096091>" : ["moça", "mulher", "puta", "foid", "vagabunda", "fudida", "ela", "cagona", "feia", "desgraçada", "vaca", "dela", "nela", "cadela", "cachorra", "loira", "bonita", "linda", "gostosa", "peituda", "bunduda", "magnifica", "estupida", "burra"],
+      "<:moca:1390104833092096091>" : ["moça", "moca", "mulher", "puta", "foid", "vagabunda", "fudida", "ela", "cagona", "feia", "desgraçada", "vaca", "dela", "nela", "cadela", "cachorra", "loira", "bonita", "linda", "gostosa", "peituda", "bunduda", "magnifica", "estupida", "burra", "vadia"],
     };
 
     const texto = message.content
