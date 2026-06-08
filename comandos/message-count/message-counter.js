@@ -1,20 +1,16 @@
-const mongo = require("./mongo");
-const messageCountSchema = require("../schemas/message-count-schema");
-
-console.log("arquivo message-counter carregado");
+const mongo = require("../schemas/mongo");
+const userSchema = require("../schemas/user-schema");
 
 module.exports = (client) => {
-  console.log("messageCounter carregado");
-
   client.on("messageCreate", async (message) => {
-    console.log("mensagem recebida");
     const { author } = message;
     const { id } = author;
-    console.log("AUTHOR: " + author);
+    //essas variaveis são só pra não tomar tanto espaço
+    //quando for escrever o await ai embaixo
 
     await mongo().then(async (mongoose) => {
       try {
-        await messageCountSchema
+        await userSchema
           .findOneAndUpdate(
             { _id: id },
             {
