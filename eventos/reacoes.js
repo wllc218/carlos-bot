@@ -1,7 +1,6 @@
 import { Events } from "discord.js";
 import emojisData from "../data/emojis.json" with { type: "json" };
 const emojis = emojisData.emojis;
-
 export const name = Events.MessageCreate;
 export async function execute(message) {
   if (message.author.bot) return;
