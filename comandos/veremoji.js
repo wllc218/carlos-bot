@@ -1,5 +1,6 @@
 import { EmbedBuilder } from "discord.js";
-import emojis from "../data/emojis.json" with { type: "json" };
+import emojisData from "../data/emojis.json" with { type: "json" };
+const emojis = emojisData.emojis;
 
 export const name = "veremoji";
 export function execute(message, args) {

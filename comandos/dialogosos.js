@@ -11,7 +11,7 @@ export async function execute(message) {
 
   jogoAtivo = true;
 
-  const bloco = dialogos[Math.floor(Math.random() * length)];
+  const bloco = dialogos[Math.floor(Math.random() * dialogos.length)];
   const frase = bloco.frases[Math.floor(Math.random() * bloco.frases.length)];
 
   let tentativas = 3;
