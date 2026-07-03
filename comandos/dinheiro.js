@@ -1,10 +1,8 @@
-const userSchema = require("./schemas/user-schema");
+import User from "../server/schemas/user-schema.js";
 
-module.exports = {
-  name: "dinheiro",
-  async execute(message) {
-    const id = message.author.id;
-    const dinheiroQuantia = await userSchema.findById(id);
-    message.reply(`vc tem ${dinheiroQuantia.cash.toString()} reais parabens`);
-  },
-};
+export const name = "dinheiro";
+export async function execute(message) {
+  const id = message.author.id;
+  const dinheiroQuantia = await User.findById(id);
+  message.reply(`vc tem ${dinheiroQuantia.cash.toString()} reais parabens`);
+}

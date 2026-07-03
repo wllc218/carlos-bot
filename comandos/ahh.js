@@ -1,10 +1,7 @@
-module.exports = {
-  name: "say",
-  execute(message, args) {
-    if (args.length === 0) return message.reply(" ");
-
-    const texto = message.toString().split(" ").slice(1).join(" ");
-
-    message.channel.send(texto);
-  },
-};
+export const name = "say";
+export function execute(message, args) {
+  if (!args.length) {
+    return message.reply("Filho da puta.");
+  }
+  message.channel.send(args.join(" "));
+}

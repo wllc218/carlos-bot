@@ -1,6 +1,4 @@
-module.exports = {
-    name: "buceta",
-    execute(message) {
-        message.reply("oi")
-    }
+export const name = "buceta";
+export function execute(message) {
+  message.reply("oi");
 }

@@ -1,4 +1,4 @@
-const respostas = [
+const respostasBasicas = [
   "oi tudo bem",
   "VAI SE FUDERRRRRRRRR",
   "caguei mt",
@@ -10,14 +10,11 @@ const respostas = [
   "Eu te amo.",
   "<:CORINTHIANS:1452793095635599462>",
   "verdade",
+  "Viado, é questão de lógica.",
   "3748374834837483",
   "acho q isac",
   "nseiii",
-  "O NICOLAS NE",
-  "vc",
   "odeio",
-  "o lucas",
-  "o walface",
   "VC SABIA Q SE VC MATAR UM ANJO NO ISAAC COM O ISAAC VC PODE RANDOMIZAR TANTO O ITEM NORMAL QUANTO A CHAVE Q O ANJO DROPA SABIA SABIA",
   "EU JA SABIA",
   "o seu viadinho que da o cu do caralho",
@@ -36,7 +33,7 @@ const respostas = [
   "EU TE ODEIO MUITO.",
   "EU TE AMO MUITO.",
   "vc e um merda",
-  "OLHA O 67 KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK",
+  "67.",
   "AQUELE JOGO LÁ O ISAC",
   "TO CAGANDO E A BOSTA N DESCE",
   "novo meme",
@@ -46,18 +43,30 @@ const respostas = [
   "fiquei sabendo dumas parada ai.",
   "ola tudo bem",
   "TAKE THIS",
-  "TAKE THAT",
   "LETS DO THIS",
   "YES",
 ];
 
-module.exports = {
-  name: "ata",
-  execute(message, args) {
-    if (!args.length) {
-      return message.reply("ESCREVE ALGUMA COISA PORR");
-    }
-    const sorte = Math.floor(Math.random() * respostas.length);
-    message.reply(respostas[sorte]);
-  },
-};
+const nomes = [
+  "o lucas.",
+  "o NICOLAS NE",
+  "o wallace",
+  "o ####",
+  "VOCE",
+  "Ele",
+  "eu",
+];
+export const name = "ata";
+export function execute(message, args) {
+  let mensagem;
+  if (!args.length) {
+    return message.reply("ESCREVE ALGUMA COISA PORR");
+  }
+  if (args[0].toLowerCase() === "quem") {
+    mensagem = nomes;
+  } else {
+    mensagem = respostasBasicas;
+  }
+  const sorte = Math.floor(Math.random() * mensagem.length);
+  message.reply(mensagem[sorte]);
+}

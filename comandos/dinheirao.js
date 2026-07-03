@@ -1,16 +1,13 @@
-const userSchema = require("./schemas/user-schema");
+import User from "../server/schemas/user-schema.js";
 
-module.exports = {
-  name: "dinheirao",
+export const name = "dinheirao";
+export async function execute(message) {
+  const dinheiro = Math.floor(Math.random() * 100 + 1);
+  await User.findOneAndUpdate(
+    { _id: message.author.id },
+    { $inc: { cash: dinheiro } },
+    { upsert: true },
+  );
 
-  async execute(message) {
-    const dinheiro = Math.floor(Math.random() * 100 + 1);
-    await userSchema.findOneAndUpdate(
-      { _id: message.author.id },
-      { $inc: { cash: dinheiro } },
-      { upsert: true },
-    );
-
-    message.reply(`VC GANHOU ${dinheiro} CARALHINHOS.`);
-  },
-};
+  message.reply(`VC GANHOU ${dinheiro} CARALHINHOS.`);
+}

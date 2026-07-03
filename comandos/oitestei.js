@@ -1,18 +1,15 @@
-const userSchema = require("./schemas/user-schema");
+import User from "../server/schemas/user-schema.js";
 
-module.exports = {
-  name: "testei",
+export const name = "testei";
+export async function execute(message) {
+  const id = message.author.id;
+  const resultado = await User.findById(id);
 
-  async execute(message) {
-    const id = message.author.id;
-    const resultado = await userSchema.findById(id);
-
-    if (!resultado) {
-      message.reply("n deu");
-      return;
-    }
-    message.reply(
-      `OLÁ. <@${resultado._id}> VOCE MANDOU ${resultado.messageCount.toString()} MENSAGENS.`,
-    );
-  },
-};
+  if (!resultado) {
+    message.reply("n deu");
+    return;
+  }
+  message.reply(
+    `OLÁ. <@${resultado._id}> VOCE MANDOU ${resultado.messageCount.toString()} MENSAGENS.`,
+  );
+}

@@ -1,44 +1,31 @@
-const { EmbedBuilder } = require("discord.js");
+import { EmbedBuilder } from "discord.js";
 
-
-module.exports = {
-    name: "jogo",
-
-    async execute(message) {
-        
-        const page = Math.floor(Math.random() * 500) + 1;
-        const resposta = await fetch(
-            `https://api.rawg.io/api/games?key=1c0bc51108974f1db030f7e31d35a501&page=${page}&page_size=40`
-        );
-
-        const dados = await resposta.json();
-
-        const aleatorio = Math.floor(Math.random() * dados.results.length);
-        const jogo = dados.results[aleatorio];
-
-        const randomColor = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, "0");
-
-        const plataformas = jogo.platforms
-            ?.map(p => p.platform.name)
-            .join(", ") || "Desconhecido";
-
-
-
-        const embed = new EmbedBuilder()
-            .setTitle(`🎮 ${jogo.name}\n`)
-            .setDescription(`LANÇOU EM: **${jogo.released}**
+export const name = "jogo";
+export async function execute(message) {
+  const page = Math.floor(Math.random() * 500) + 1;
+  const resposta = await fetch(
+    `https://api.rawg.io/api/games?key=1c0bc51108974f1db030f7e31d35a501&page=${page}&page_size=40`,
+  );
+  const dados = await resposta.json();
+  const aleatorio = Math.floor(Math.random() * dados.results.length);
+  const jogo = dados.results[aleatorio];
+  const randomColor = Math.floor(Math.random() * 0xffffff)
+    .toString(16)
+    .padStart(6, "0");
+  const plataformas =
+    jogo.platforms?.map((p) => p.platform.name).join(", ") || "Desconhecido";
+  const embed = new EmbedBuilder()
+    .setTitle(`🎮 ${jogo.name}\n`)
+    .setDescription(
+      `LANÇOU EM: **${jogo.released}**
                 PLATAFORMA: ${plataformas}
                 RATING: ${"⭐".repeat(Math.floor(jogo.rating))} (${jogo.rating != 0 ? jogo.rating : "SEM INFORMAÇÕES"}) 
-                
-                
-                `)
-            .setColor(`#${randomColor}`)
-            .setFooter({ text: "oi" })
-            .setTimestamp()
-            .setImage(jogo.background_image)
+                `,
+    )
+    .setColor(`#${randomColor}`)
+    .setFooter({ text: "oi" })
+    .setTimestamp()
+    .setImage(jogo.background_image);
 
-        message.reply({ embeds: [embed] });
-
-
-    }
-};
+  message.reply({ embeds: [embed] });
+}
