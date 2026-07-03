@@ -1,28 +1,23 @@
-import mongo from "../server/mongo.js";
 import User from "../server/schemas/user-schema.js";
 
 export default (client) => {
   client.on("messageCreate", async (message) => {
-    const { author } = message;
-    const { id } = author;
-    //essas variaveis são só pra não tomar tanto espaço
-    //quando for escrever o await ai embaixo
+    const { id } = message.author;
 
-    await mongo().then(async (mongoose) => {
-      try {
-        await User.findOneAndUpdate(
-          { _id: id },
-          {
-            $inc: {
-              messageCount: 1,
-            },
+    try {
+      await User.findOneAndUpdate(
+        { _id: id },
+        {
+          $inc: {
+            messageCount: 1,
           },
-          {
-            upsert: true,
-          },
-        ).exec();
-      } finally {
-      }
-    });
+        },
+        {
+          upsert: true,
+        },
+      );
+    } catch (err) {
+      console.error(err);
+    }
   });
 };

@@ -1,8 +1,6 @@
-import mongoose, { connect } from "mongoose";
-import config from "../config.json" with { type: "json" };
-const { mongoPath } = config;
+import mongoose from "mongoose";
 
 export default async () => {
-  await connect(mongoPath);
+  await mongoose.connect(process.env.MONGO_URI);
   return mongoose;
 };
