@@ -1,6 +1,6 @@
 import User from "../server/schemas/user-schema.js";
 
-export const name = "testei";
+export const name = "messages";
 export async function execute(message) {
   const id = message.author.id;
   const resultado = await User.findById(id);

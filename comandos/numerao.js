@@ -1,11 +1,12 @@
-import maximo from "./maximonumero.js";
+import { getMaximo } from "./maximonumero.js";
+
 import { EmbedBuilder } from "discord.js";
 export const name = "numerao";
 export async function execute(message) {
   let tentativas = 0;
   let historico = "";
 
-  const numeroFinal = Math.floor(Math.random() * (maximo - 100 + 1)) + 100;
+  const numeroFinal = Math.floor(Math.random() * (getMaximo() - 100 + 1)) + 100;
   const embedInicial = new EmbedBuilder()
     .setTitle("ESCREVE UM NUMERO AI ")
     .setDescription("oi digita ai")

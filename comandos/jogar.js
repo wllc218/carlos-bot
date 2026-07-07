@@ -9,22 +9,20 @@ export async function execute(message) {
   const dados = await resposta.json();
   const aleatorio = Math.floor(Math.random() * dados.results.length);
   const jogo = dados.results[aleatorio];
+  const plataformas =
+    jogo.platforms?.map((p) => p.platform.name).join(", ") || "Desconhecido";
+
   const randomColor = Math.floor(Math.random() * 0xffffff)
     .toString(16)
     .padStart(6, "0");
-  const plataformas =
-    jogo.platforms?.map((p) => p.platform.name).join(", ") || "Desconhecido";
   const embed = new EmbedBuilder()
     .setTitle(`🎮 ${jogo.name}\n`)
     .setDescription(
       `LANÇOU EM: **${jogo.released}**
-                PLATAFORMA: ${plataformas}
-                RATING: ${"⭐".repeat(Math.floor(jogo.rating))} (${jogo.rating != 0 ? jogo.rating : "SEM INFORMAÇÕES"}) 
-                `,
+    PLATAFORMA: ${plataformas}
+    RATING: ${"⭐".repeat(Math.floor(jogo.rating))} (${jogo.rating != 0 ? jogo.rating : "SEM INFORMAÇÕES"}) `,
     )
     .setColor(`#${randomColor}`)
-    .setFooter({ text: "oi" })
-    .setTimestamp()
     .setImage(jogo.background_image);
 
   message.reply({ embeds: [embed] });

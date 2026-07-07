@@ -1,11 +1,11 @@
-import maximo from "./maximonumero.js";
+import { getMaximo } from "./maximonumero.js";
 
 export const name = "numero";
 export async function execute(message) {
-  const numero = Math.floor(Math.random() * maximo) + 1;
+  const numero = Math.floor(Math.random() * getMaximo) + 1;
   let tentativas = 1;
   message.channel.send(
-    "ADIVINHE O NUMERO. ENTRE 1 E " + maximo.toString() + " VALENDOO",
+    "ADIVINHE O NUMERO. ENTRE 1 E " + getMaximo.toString() + " VALENDOO",
   );
 
   const collector = message.channel.createMessageCollector();

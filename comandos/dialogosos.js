@@ -1,4 +1,4 @@
-import dialogos from "./dialoguess.json" with { type: "json" };
+import dialogos from "../data/dialoguess.json" with { type: "json" };
 import { EmbedBuilder } from "discord.js";
 
 let jogoAtivo = false;
@@ -47,11 +47,8 @@ export async function execute(message) {
       }
 
       message.channel.send({ embeds: [final] });
-
       jogoAtivo = false;
-
       collector.stop();
-
       return;
     }
 

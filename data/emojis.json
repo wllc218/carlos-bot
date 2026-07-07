@@ -1,15 +1,15 @@
 {
     "emojis": [
         {
-            "nome": "Lorax",
+            "nome": "bosta",
+            "reactions": ["bosta", "bosta", "bostas", "bostinha", "bostinhas", "bostola", "bostolas", "bostão", "bostoes", "bostões", "embostado", "embostada", "bostear", "bostejar", "bostejando", "bostejo", "bostuda", "bostudo", "merda", "merdas", "merdinha", "merdola", "caguei", "cagando", "cagou", "cagar"],
             "raridade": "comum",
-            "discordId": "1431749216476336168",
-            "discordName": "",
+            "discordId": "1390108899863957747",
+            "discordName": "oi",
             "cor": "#FF6F61",
             "contador": 0
         },
         {
-            "id": 1,
             "nome": "Ellie",
             "raridade": "comum",
             "discordId": "1437135166312026305",
@@ -26,15 +26,8 @@
             "contador": 0
         },
         {
-            "nome": "",
-            "raridade": "raro",
-            "discordId": "1390105755423739935",
-            "discordName": "",
-            "cor": "#92A8D1",
-            "contador": 0
-        },
-        {
             "nome": "Deku",
+            "reactions": ["right", "daddy", "done", "come back", "here"],
             "raridade": "raro",
             "discordId": "1407125652322123826",
             "discordName": "DADDYISNTDONESP",
@@ -43,6 +36,7 @@
         },
         {
             "nome": "Johnkler",
+            "reactions": ["why so serious"],
             "raridade": "raro",
             "discordId": "1390104123357003806",
             "discordName": "john_kler",
@@ -50,32 +44,8 @@
             "contador": 0
         },
         {
-            "nome": "",
-            "raridade": "raro",
-            "discordId": "1390106189232078984",
-            "discordName": "",
-            "cor": "#9B2335",
-            "contador": 0
-        },
-        {
-            "nome": "",
-            "raridade": "epico",
-            "discordId": "1390636933591470143",
-            "discordName": "",
-            "cor": "#6A4A3C",
-            "contador": 0
-        },
-        {
-            "nome": "",
-            "raridade": "epico",
-            "discordId": "1390104925635215381",
-            "discordName": "",
-            "cor": "#2E8B57",
-            "contador": 0
-        },
-        {
             "nome": "PIGS",
-            "raridade": "epico",
+            "raridade": "raro",
             "discordId": "1438015083895591164",
             "discordName": "pigs",
             "cor": "#FF7F50",
@@ -83,14 +53,43 @@
         },
         {
             "nome": "Geometry sash",
-            "raridade": "epico",
+            "reactions": ["geometry", "dash", "sash", "geomerey", "gd", "geometria"],
+            "raridade": "raro",
             "discordId": "1430594895088713858",
             "discordName": "GOMETRYSASH",
             "cor": "#00A4CC",
             "contador": 0
         },
         {
+            "nome": "Demencia",
+            "reactions": ["dem", "leyte", "leite", "demencia", "dementia", "doida", "maluca", "psicopata", "duente", "doente", "louca", "milk"],
+            "raridade": "epico",
+            "discordId": "1392605726786191441",
+            "discordName": "leyte",
+            "cor": "#00A4CC",
+            "contador": 0
+        },
+        {
+            "nome": "Sissyphus",
+            "reactions": ["YES[S]*", "THATS IT"],
+            "raridade": "epico",
+            "discordId": "1481109255355367455",
+            "discordName": "sisycus",
+            "cor": "#00A4CC",
+            "contador": 0
+        },
+        {
+            "nome": "SONIC. EXE",
+            "reactions": ["eles", "elas", "TA[A]*KE", "THA[A]*T", "LETS DO THIS", "YES", "HAH[AH]*", "TAKE", "CAPUHA", "PAPUHA", "PREPARE FOR", "Sonic", ". exe", "THI[I]*S[S]*"],
+            "raridade": "epico",
+            "discordId": "1497972408391434462",
+            "discordName": "oie",
+            "cor": "#0041c2",
+            "contador": 0
+        },
+        {
             "nome": "Seisete",
+            "reactions": ["67", "seis sete", "six seven"],
             "raridade": "mitico",
             "discordId": "1441569985674743829",
             "discordName": "seisete",
@@ -99,6 +98,7 @@
         },
         {
             "nome": "Ainda água",
+            "reactions": ["sigma", "mango", "those who knows", "aqueles que sabem", "agua", "aura"],
             "raridade": "mitico",
             "discordId": "1390104307738869811",
             "discordName": "ainda",
@@ -115,14 +115,16 @@
         },
         {
             "nome": "Senta",
-            "raridade": "mitico",
+            "reactions": ["aqui", "ali", "la", "acula", "cade", "aonde", "this"],
+            "raridade": "epico",
             "discordId": "1227090538399006841",
-            "discordName": "",
+            "discordName": "dT45bo6yc",
             "cor": "#B565A7",
             "contador": 0
         },
         {
             "nome": "M&L",
+            "reactions": ["m&l", "mario", "luigi"],
             "raridade": "mitico",
             "discordId": "1175490307454935102",
             "discordName": "tres",
@@ -131,7 +133,7 @@
         },
         {
             "nome": "Regina",
-            "reactions": ["regina", "vagina", "GO GO GO GO", "buceta", "prikito", "prikituda"],
+            "reactions": ["regina", "vagina", "GO", "buceta", "prikito", "prikituda"],
             "raridade": "lendario",
             "discordId": "1390109875089965228",
             "discordName": "vagina",
@@ -140,6 +142,7 @@
         },
         {
             "nome": "Shappy",
+            "reactions": ["feliz", "pabens", "happy"],
             "raridade": "lendario",
             "discordId": "1392167699857145987",
             "discordName": "steamhave",
@@ -148,7 +151,7 @@
         },
         {
             "nome": "Menuina",
-            "reactions":["nos", "agente", "vamos", "a gente", "vamo", "gente", "iremos", "somos", "nossas", "5", "cinco", "five", "menuina", "menina", "voce ja viu", "voces ja viram", "olho", "olhos"],
+            "reactions":["nos", "agente", "vamos", "vamo", "gente", "iremos", "somos", "nossas", "5", "cinco", "five", "menuina", "menina", "ja viu", "ja viram", "olho", "olhos"],
             "raridade": "lendario",
             "discordId": "1415817551333818550",
             "discordName": "vocejaviuessameniuna",
@@ -160,6 +163,15 @@
             "raridade": "lendario",
             "discordId": "1167645969878352024",
             "discordName": "channels4_profile",
+            "cor": "#0B6E4F",
+            "contador": 0
+        },
+        {
+            "nome": "Moça",
+            "reactions": ["moca", "xebiu", "mulher", "puta", "foid", "vagabunda", "fudida", "ela", "cagona", "feia", "desgraçada", "vaca", "dela", "nela", "cadela", "cachorra", "loira", "bonita", "linda", "gostosa", "peituda", "bunduda", "magnifica", "estupida", "burra", "vadia", "merdalher", "bitch", "senhorita", "senhora", "prostituta", "diva", "perfeita", "divonica", "babilonica", "mana", "faraonica", "labubonica", "tesuda", "bucetuda", "piranha", "piranhuda", "woman", "she", "her", "hoe"],
+            "raridade": "lendario",
+            "discordId": "1390104833092096091",
+            "discordName": "moca",
             "cor": "#0B6E4F",
             "contador": 0
         },
@@ -200,14 +212,6 @@
             "contador": 0
         },
         {
-            "nome": "Lavinia",
-            "raridade": "cromatico",
-            "discordId": "1078845696322584706",
-            "discordName": "unknown2",
-            "cor": "#845EC2",
-            "contador": 0
-        },
-        {
             "nome": "Theo",
             "reactions": ["theo", "6", "seis", "six"],
             "raridade": "cromatico",
@@ -215,7 +219,23 @@
             "discordName": "theo",
             "cor": "#845EC2",
             "contador": 0
+        },
+        {
+            "nome": "SONIC. EXE PRIME",
+            "reactions": ["HAH[AH]*", "NIGGARLAS", "niggalas"],
+            "raridade": "cromatico",
+            "discordId": "1505684509591339208",
+            "discordName": "dsd",
+            "cor": "#0041c2",
+            "contador": 0
+        },
+        {
+            "nome": "Lavinia",
+            "raridade": "Lavinia",
+            "discordId": "1078845696322584706",
+            "discordName": "unknown2",
+            "cor": "#845EC2",
+            "contador": 0
         }
-    ],
-    "total": 0
+    ]
 }

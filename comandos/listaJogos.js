@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-export const name = "lista";
+export const name = "listaJogos";
 export async function execute(message, args) {
   const pagina = Number(args[0]) || 1;
 

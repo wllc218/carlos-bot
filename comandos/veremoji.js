@@ -4,33 +4,26 @@ const emojis = emojisData.emojis;
 
 export const name = "veremoji";
 export function execute(message, args) {
+  let teste;
   if (!args[0]) {
-    return message.reply("VC NAO ESCREVEU NADA");
+    return message.reply("NAO TEM ESSE EMOJI");
   }
-  const input = args[0].toLowerCase();
-  let emoji;
-
-  if (!isNaN(input)) {
-    emoji = emojis.find((e) => e.id == input);
+  if (!isNaN(args[0])) {
+    teste = emojis[args[0]];
   } else {
-    emoji = emojis.find((e) => e.nome.toLowerCase() === input);
-  }
-
-  if (!emoji) {
-    return message.reply(
-      `NN TEM ESSE EMOJI AI NAO ESCOLHE UM NUMERO ENTRE 0 E ${emojis.length - 1} OU ESCREVE O NOME CERTO NE BURRAO`,
-    );
+    teste = emojis.find((e) => e.nome.toLowerCase() == args[0].toLowerCase());
   }
 
   const embed = new EmbedBuilder()
-    .setTitle(emoji.nome)
+    .setTitle(teste.nome)
     .setDescription(
-      `**RARIDADE**: ${emoji.raridade}\n` +
-        `**CONTADOR**: ${emoji.contador}\n` +
-        `**ID**: ${emoji.id}`,
+      `RARIDADE: ${teste.raridade}
+          CONTADOR: ${teste.contador}
+          ID: ${teste.discordId}
+          `,
     )
-    .setColor(emoji.cor)
-    .setThumbnail(`https://cdn.discordapp.com/emojis/${emoji.discordId}.png`);
+    .setColor(teste.cor)
+    .setThumbnail(`https://cdn.discordapp.com/emojis/${teste.discordId}.png`);
 
   message.reply({ embeds: [embed] });
 }
