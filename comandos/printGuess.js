@@ -63,7 +63,7 @@ export function execute(message) {
             // CORREÇÃO AQUI: Transforma o frame sorteado em segundos exatos com 3 casas decimais
             // Isso permite que o FFmpeg pule direto para o ponto certo do link de rede de forma ultra rápida
             const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
-            const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec bmp -`;
+            const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
             
             // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
             exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 }, async (err2, stdoutBuffer) => {
