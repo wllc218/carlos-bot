@@ -1,4 +1,4 @@
-import User from "../server/schemas/user-schema.js";
+import User from "../../server/schemas/user-schema.js";
 
 export const name = "carteira";
 export async function execute(message) {

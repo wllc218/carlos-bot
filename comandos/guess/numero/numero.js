@@ -1,4 +1,4 @@
-import { getMaximo } from "./maximonumero.js";
+import { getMaximo } from "./numeroMax.js";
 
 export const name = "numero";
 export async function execute(message) {

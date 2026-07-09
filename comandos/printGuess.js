@@ -80,7 +80,7 @@ export function execute(message) {
 
                     // 6. ENVIA O DESAFIO NO CHAT
                     await message.reply({
-                        content: `🎮 **DESAFIO GAMER**\nQUAL O VIDEL DAI DA PRINT O NGC AI OLHA\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n• Intensidade do Zoom: ~**${porcentagemZoom}%**\n\n`,
+                        content: `🎮 **DESAFIO GAMER**\nQUAL O VIDEL DAI DA PRINT O NGC AI OLHA\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n\n\n`,
                         files: [{
                             attachment: imagemComZoomBuffer,
                             name: "desafio_zoom.png"

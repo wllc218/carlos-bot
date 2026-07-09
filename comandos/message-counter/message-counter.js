@@ -1,4 +1,4 @@
-import User from "../server/schemas/user-schema.js";
+import User from "../../server/schemas/user-schema.js";
 
 export default (client) => {
   client.on("messageCreate", async (message) => {
