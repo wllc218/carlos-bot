@@ -60,9 +60,10 @@ export function execute(message) {
             const totalDeFrames = Math.floor(duracao * fps);
             const frameSorteado = Math.floor(Math.random() * totalDeFrames);
 
-            // CORREÇÃO AQUI: Transforma o frame sorteado em segundos exatos com 3 casas decimais
-            // Isso permite que o FFmpeg pule direto para o ponto certo do link de rede de forma ultra rápida
+            // Transforma o frame sorteado em segundos exatos para busca veloz via Fast Seeking (-ss)
             const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
+            
+            // FORMATO ATUALIZADO: 'mjpeg' para compatibilidade total com buffers no Windows
             const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
             
             // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
@@ -89,7 +90,7 @@ export function execute(message) {
                         .toBuffer();
 
                     const porcentagemZoom = Math.round((1 - fatorZoom) * 100);
-                    const listaCategoriasTexto = categoriasDisponiveis.map(cat => `• **${cat}**`).join("\n");
+                    const listaCategoriasTexto = Pattern.compile? categoriasDisponiveis.map(cat => `• **${cat}**`).join("\n") : categoriasDisponiveis.map(cat => `• **${cat}**`).join("\n");
 
                     // 6. ENVIA O DESAFIO NO CHAT
                     await message.reply({
@@ -110,14 +111,30 @@ export function execute(message) {
                     const filtroChat = (m) => !m.author.bot;
                     const coletorChat = message.channel.createMessageCollector({ filter: filtroChat });
 
-                    coletorChat.on("collect", (msgPretendente) => {
+                    coletorChat.on("collect", async (msgPretendente) => {
                         const respostaUsuario = msgPretendente.content.trim().toLowerCase();
                         const respostaCorreta = videoSorteado.categoriaNome.toLowerCase();
 
                         // Resposta imediata se acertar
                         if (respostaUsuario === respostaCorreta) {
                             coletorChat.stop(); 
-                            return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`);
+
+                            try {
+                                // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
+                                const imagemOriginalBuffer = await sharp(stdoutBuffer).toBuffer();
+
+                                return message.channel.send({
+                                    content: `🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
+                                    files: [{
+                                        attachment: imagemOriginalBuffer,
+                                        name: "resposta_original.png"
+                                    }]
+                                });
+                            } catch (errResposta) {
+                                console.error("[Erro Sharp] Falha ao gerar imagem de resposta:", errResposta);
+                                // Fallback em texto caso a geração da resposta sem zoom falhe por segurança
+                                return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`);
+                            }
                         } 
                         
                         // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
@@ -130,7 +147,7 @@ export function execute(message) {
 
                 } catch (errSharp) {
                     console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
-                    return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
+                    return processarVideo(msgProcessando, cronometroCarregando, tentatives + 1);
                 }
             });
         });
@@ -145,7 +162,7 @@ export function execute(message) {
             pontos++;
             const sufixoPontos = " .".repeat(pontos);
             
-            await msgProcessando.edit(`🔄 CARREGANDO${sufixoPontos}`).catch(() => {});
+            await msgProcessando.edit(`🔄 CARGANDO${sufixoPontos}`).catch(() => {});
         }, 1000);
 
         // Dispara a função principal injetando a mensagem e o cronômetro dela
