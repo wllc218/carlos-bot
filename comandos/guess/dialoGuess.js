@@ -1,10 +1,10 @@
-import dialogos from "../data/dialoguess.json" with { type: "json" };
+import dialogos from "../../data/dialoguess.json" with { type: "json" };
 import { EmbedBuilder } from "discord.js";
-import User from "../server/schemas/user-schema.js";
+import User from "../../server/schemas/user-schema.js";
 
 let jogoAtivo = false;
 
-export const name = "dialog";
+export const name = "dialoguess";
 export async function execute(message) {
   if (jogoAtivo) {
     return message.reply("PERA Q JA MANDARAM O COMANDO ESPERA ACABA");

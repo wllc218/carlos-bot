@@ -1,4 +1,4 @@
-import { getMaximo } from "./maximonumero.js";
+import { getMaximo } from "./numeroMax.js";
 
 import { EmbedBuilder } from "discord.js";
 export const name = "numerao";

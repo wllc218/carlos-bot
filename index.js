@@ -8,7 +8,7 @@ import connectDB from "./server/mongo.js";
 import mongoose from "mongoose";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
-import messageCount from "./comandos/message-counter.js";
+import messageCount from "./comandos/message-counter/message-counter.js";
 //prettier-ignore
 //prettier-ignore
 const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});

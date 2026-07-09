@@ -1,4 +1,4 @@
-import falas from "../data/ata.json" with { type: "json" };
+import falas from "../../data/emojis.json" with { type: "json" };
 export const name = "ata";
 export function execute(message, args) {
   let mensagem;
