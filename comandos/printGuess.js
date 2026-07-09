@@ -7,6 +7,7 @@ export const name = "printguess";
 export function execute(message) {
     // 1. TRANSFORMA O OBJETO EM UMA LISTA ÚNICA DE VÍDEOS
     // Junta todas as categorias ("sonicexe", "carlostale", etc.) em um único lugar
+    console.log("CONTEÚDO DO JSON CARREGADO:", videos);
     const todosOsVideos = [];
     for (const categoria in videos) {
         if (Array.isArray(videos[categoria])) {
