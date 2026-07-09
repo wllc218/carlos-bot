@@ -20,6 +20,15 @@ const userSchema = new Schema({
       quantidade: Number,
     },
   ],
+
+  vitorias: [
+    {
+      dialogo: Number,
+      default: 0,
+      print: Number,
+      default: 0,
+    },
+  ],
 });
 
 export default model("users", userSchema);
