@@ -23,40 +23,53 @@ export function execute(message) {
         return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
     }
 
-    // Função interna para processamento e tratamento de erros
-    function processarVideo(msgProcessando, tentativas = 0) {
+    // Função interna para processamento - Recebe corretamente o cronômetro como segundo parâmetro
+    function processarVideo(msgProcessando, cronometroCarregando, tentativas = 0) {
         if (tentativas >= 3) {
-            if (msgProcessando) msgProcessando.delete().catch(() => {});
+            if (msgProcessando) {
+                clearInterval(cronometroCarregando);
+                msgProcessando.delete().catch(() => {});
+            }
             return message.reply("❌ Ocorreram erros seguidos ao tentar ler os vídeos na nuvem.");
         }
 
         const videoSorteado = todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
         const linkVideo = videoSorteado.url;
 
-        // 2. BUSCA AS DIMENSÕES E DURAÇÃO REAL DO VÍDEO (FAST SEEKING)
-        exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 5000 }, (err, stdout) => {
+        // 2. BUSCA AS DIMENSÕES, DURAÇÃO REAL E TAXA DE FRAMES (FPS) DO VÍDEO
+        exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 5000 }, (err, stdout) => {
             if (err) {
                 console.error(`[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro...`);
-                return processarVideo(msgProcessando, tentativas + 1);
+                return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
             }
 
             const dados = stdout.trim().split("\n");
             const larguraOriginal = parseInt(dados[0]);
             const alturaOriginal = parseInt(dados[1]);
-            const duracao = parseFloat(dados[2]);
             
-            if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(duracao)) {
-                return processarVideo(msgProcessando, tentativas + 1);
+            // Tratamento da taxa de frames (r_frame_rate vem em formato de fração, ex: "30/1" ou "60000/1001")
+            const expressaoFps = dados[2].split("/");
+            const fps = parseFloat(expressaoFps[0]) / parseFloat(expressaoFps[1]);
+            const duracao = parseFloat(dados[3]);
+            
+            if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(fps) || isNaN(duracao)) {
+                return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
             }
 
-            const tempo = Math.floor(Math.random() * duracao);
-            const ffmpegComando = `ffmpeg -y -ss ${tempo} -i "${linkVideo}" -frames:v 1 -f image2pipe -vcodec png -`;
+            // Calcula o total de frames aproximados do vídeo e sorteia um frame específico
+            const totalDeFrames = Math.floor(duracao * fps);
+            const frameSorteado = Math.floor(Math.random() * totalDeFrames);
+
+            // CORREÇÃO AQUI: Transforma o frame sorteado em segundos exatos com 3 casas decimais
+            // Isso permite que o FFmpeg pule direto para o ponto certo do link de rede de forma ultra rápida
+            const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
+            const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
             
-            // 3. EXTRAI O FRAME ORIGINAL NA MEMÓRIA RAM
-            exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 20, timeout: 7000 }, async (err2, stdoutBuffer) => {
+            // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
+            exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 }, async (err2, stdoutBuffer) => {
                 if (err2) {
                     console.error(`[Erro FFMPEG] Falha ao extrair frame do vídeo: ${videoSorteado.nome}. Tentando outro...`);
-                    return processarVideo(msgProcessando, tentativas + 1);
+                    return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
                 }
 
                 try {
@@ -87,12 +100,11 @@ export function execute(message) {
                         }]
                     });
 
+                    // Limpa o intervalo e apaga a mensagem de carregamento
                     if (msgProcessando) {
                         clearInterval(cronometroCarregando);
                         msgProcessando.delete().catch(() => {});
                     }
-
-                    if (msgProcessando) msgProcessando.delete().catch(() => {});
 
                     // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)
                     const filtroChat = (m) => !m.author.bot;
@@ -105,7 +117,7 @@ export function execute(message) {
                         // Resposta imediata se acertar
                         if (respostaUsuario === respostaCorreta) {
                             coletorChat.stop(); 
-                            return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Segundo exato: **${tempo}s**`);
+                            return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`);
                         } 
                         
                         // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
@@ -118,16 +130,17 @@ export function execute(message) {
 
                 } catch (errSharp) {
                     console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
-                    return processarVideo(msgProcessando, tentativas + 1);
+                    return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
                 }
             });
         });
     }
 
-message.channel.send("🔄 CARGANDO .").then(msgProcessando => {
+    // Envia a mensagem inicial de carregamento
+    message.channel.send("🔄 CARGANDO .").then(msgProcessando => {
         let pontos = 1;
 
-        // Inicia o intervalo de 1 segundo para atualizar o "CARREGANDO . . ."
+        // Inicia o intervalo de 1 segundo para atualizar os pontos dinamicamente
         const cronometroCarregando = setInterval(async () => {
             pontos++;
             const sufixoPontos = " .".repeat(pontos);
