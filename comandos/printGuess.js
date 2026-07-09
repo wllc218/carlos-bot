@@ -9,7 +9,6 @@ export function execute(message) {
     const todosOsVideos = [];
     for (const categoria in videos) {
         if (Array.isArray(videos[categoria])) {
-            // Mapeia os vídeos injetando a propriedade "categoriaNome" em cada um deles
             const videosComCategoria = videos[categoria].map(video => ({
                 ...video,
                 categoriaNome: categoria
@@ -45,7 +44,6 @@ export function execute(message) {
             const duracao = parseFloat(dados[2]);
             
             if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(duracao)) {
-                console.error(`[Erro Dados] Dados inválidos para o vídeo: ${videoSorteado.nome}. Tentando outro...`);
                 return processarVideo(msgProcessando, tentativas + 1);
             }
 
@@ -60,7 +58,7 @@ export function execute(message) {
                 }
 
                 try {
-                    // 4. CÁLCULO DO ZOOM ALEATÓRIO (De 2/4 até quase zoom total de 4/4)
+                    // 4. CÁLCULO DO ZOOM ALEATÓRIO (De 2/4 até zoom quase total de 4/4)
                     const fatorZoom = 0.1 + Math.random() * 0.4; 
                     
                     const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
@@ -77,19 +75,40 @@ export function execute(message) {
 
                     const porcentagemZoom = Math.round((1 - fatorZoom) * 100);
 
-                    // 6. ENVIA PARA O DISCORD EXIBINDO A CATEGORIA, NOME E DELETA O CARREGANDO
-                    message.reply({
-                        content: `🎮 **Desafio Gerado!**\n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo: **${videoSorteado.nome}**\n• Segundo sorteado: **${tempo}s**\n• Intensidade do Zoom: ~**${porcentagemZoom}%**`,
+                    // 6. ETAPA 1: ENVIA O DESAFIO E ADICIONA AS REAÇÕES BASE NA IMAGEM
+                    const msgDesafio = await message.reply({
+                        content: `🎮 **DESAFIO**\n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo: **${videoSorteado.nome}**\n• Segundo sorteado: **${tempo}s**\n• Intensidade do Zoom: ~**${porcentagemZoom}%**\n\nR`,
                         files: [{
                             attachment: imagemComZoomBuffer,
                             name: "desafio_zoom.png"
                         }]
-                    }).then(() => {
-                        if (msgProcessando) msgProcessando.delete().catch(() => {});
-                    }).catch(errDiscord => {
-                        console.error("Erro ao enviar no Discord:", errDiscord);
-                        if (msgProcessando) msgProcessando.delete().catch(() => {});
                     });
+
+                    // Apaga o "carregando" assim que a foto sobe no Discord
+                    if (msgProcessando) msgProcessando.delete().catch(() => {});
+
+                    // Aplica os 4 emojis iniciais embaixo da mensagem da imagem
+                    const emojisIniciais = ["❤️", "⭐", "🔮", "🌀"];
+                    for (const emoji of emojisIniciais) {
+                        await msgDesafio.react(emoji).catch(console.error);
+                    }
+
+                    // 7. ETAPA 2: CRONÔMETRO DE 5 SEGUNDOS PARA AS SUB-OPÇÕES
+                    setTimeout(async () => {
+                        try {
+                            const msgSubmenu = await message.channel.send(
+                                `🍎 **Eu amo buceta`
+                            );
+
+                            // Aplica as 4 sub-reações na nova mensagem de texto
+                            const emojisSubmenu = ["🍌", "🍎", "🍐", "🍇"];
+                            for (const emoji of emojisSubmenu) {
+                                await msgSubmenu.react(emoji).catch(console.error);
+                            }
+                        } catch (errSubmenu) {
+                            console.error("Erro ao enviar o submenu de reações:", errSubmenu);
+                        }
+                    }, 5000); // 5000 milissegundos = 5 segundos
 
                 } catch (errSharp) {
                     console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
@@ -99,6 +118,7 @@ export function execute(message) {
         });
     }
 
+    // Mensagem inicial de feedback visual
     message.channel.send("🔄 Puxando o vídeo da nuvem e aplicando o efeito de zoom extremo...").then(msgProcessando => {
         processarVideo(msgProcessando);
     }).catch(console.error);
