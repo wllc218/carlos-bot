@@ -5,7 +5,6 @@ import videos from "../data/videos.json" with { type: "json" };
 
 export const name = "printguess";
 export function execute(message) {
-    // 1. JUNTA TODOS OS VÍDEOS
     const todosOsVideos = [];
     for (const categoria in videos) {
         if (Array.isArray(videos[categoria])) {
@@ -17,64 +16,78 @@ export function execute(message) {
         return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
     }
 
-    // 2. TESTE DE SISTEMA: VERIFICA SE O FFPROBE EXISTE NA MÁQUINA
-    exec("ffprobe -version", (errVersion) => {
-        if (errVersion) {
-            return message.reply(
-                "❌ **ERRO DE SISTEMA:** O programa `ffprobe` não está instalado na hospedagem do seu bot! " +
-                "Você precisa instalar o FFmpeg/FFprobe no sistema operacional do servidor para que o comando funcione."
-            );
+    function processarVideo(tentativas = 0) {
+        if (tentativas >= 3) {
+            return message.reply("❌ Ocorreram erros seguidos ao tentar ler os vídeos na nuvem.");
         }
 
-        // Se o ffprobe existe, escolhe um vídeo e tenta ler
         const videoSorteado = todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
         const linkVideo = videoSorteado.url;
 
-        message.channel.send(`🔄 Testando conexão com o vídeo: **${videoSorteado.nome}**...`).then(msgProcessando => {
+        // 1. BUSCA AS DIMENSÕES E DURAÇÃO REAL DO VÍDEO
+        exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 5000 }, (err, stdout) => {
+            if (err) {
+                console.error(`[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro...`);
+                return processarVideo(tentativas + 1);
+            }
 
-            // 3. EXECUTA O FFPROBE NO VÍDEO
-            exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 8000 }, (err, stdout) => {
-                if (err) {
-                    msgProcessando.delete().catch(() => {});
-                    console.error("ERRO DETALHADO DO FFPROBE:", err);
-                    return message.reply(
-                        `❌ **ERRO DE CONEXÃO:** O ffprobe está instalado, mas não conseguiu acessar o vídeo **${videoSorteado.nome}** na nuvem.\n` +
-                        `• Erro: \`${err.message.substring(0, 100)}...\`\n` +
-                        `• Verifique se o link funciona no seu navegador: ${linkVideo}`
-                    );
+            const dados = stdout.trim().split("\n");
+            const larguraOriginal = parseInt(dados[0]);
+            const alturaOriginal = parseInt(dados[1]);
+            const duracao = parseFloat(dados[2]);
+            
+            if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(duracao)) {
+                console.error(`[Erro Dados] Dados inválidos para o vídeo: ${videoSorteado.nome}. Tentando outro...`);
+                return processarVideo(tentativas + 1);
+            }
+
+            const tempo = Math.floor(Math.random() * duracao);
+            const ffmpegComando = `ffmpeg -y -ss ${tempo} -i "${linkVideo}" -frames:v 1 -f image2pipe -vcodec png -`;
+            
+            // 2. EXTRAI O FRAME ORIGINAL NA MEMÓRIA RAM
+            exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 20, timeout: 7000 }, async (err2, stdoutBuffer) => {
+                if (err2) {
+                    console.error(`[Erro FFMPEG] Falha ao extrair frame: ${videoSorteado.nome}. Tentando outro...`);
+                    return processarVideo(tentativas + 1);
                 }
 
-                const dados = stdout.trim().split("\n");
-                const duracao = parseFloat(dados[2]);
-                
-                if (isNaN(duracao)) {
-                    msgProcessando.delete().catch(() => {});
-                    return message.reply(`❌ O vídeo **${videoSorteado.nome}** retornou dados inválidos na nuvem.`);
-                }
+                try {
+                    // 3. CÁLCULO DO ZOOM ALEATÓRIO (Entre 2/4 e 3/4 do tamanho da imagem)
+                    // Sorteia uma escala entre 0.5 (2/4) e 0.75 (3/4)
+                    const fatorZoom = 0.5 + Math.random() * 0.25; 
+                    
+                    const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
+                    const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
 
-                const tempo = Math.floor(Math.random() * duracao);
-                const ffmpegComando = `ffmpeg -y -ss ${tempo} -i "${linkVideo}" -frames:v 1 -f image2pipe -vcodec png -`;
-                
-                // 4. EXECUTA O FFMPEG
-                exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 20, timeout: 10000 }, (err2, stdoutBuffer) => {
-                    if (err2) {
-                        msgProcessando.delete().catch(() => {});
-                        console.error("ERRO DETALHADO DO FFMPEG:", err2);
-                        return message.reply(`❌ O ffprobe leu o vídeo, mas o **ffmpeg** falhou ao tirar o print.`);
-                    }
+                    // Sorteia a posição X e Y de onde o corte vai começar (sem passar das bordas)
+                    const xAleatorio = Math.floor(Math.random() * (larguraOriginal - larguraCorte));
+                    const yAleatorio = Math.floor(Math.random() * (alturaOriginal - alturaCorte));
 
-                    // Se tudo der certo
+                    // 4. SHARP APLICA O CORTE E REDIMENSIONA (ZOOM) NA RAM
+                    const imagemComZoomBuffer = await sharp(stdoutBuffer)
+                        .extract({ left: xAleatorio, top: yAleatorio, width: larguraCorte, height: alturaCorte })
+                        .resize(larguraOriginal, alturaOriginal) // Redimensiona de volta ao tamanho original para dar o efeito de aproximação
+                        .toBuffer();
+
+                    // 5. ENVIA A IMAGEM ZOOMADA PARA O DISCORD
                     message.reply({
-                        content: `✅ **Sucesso!** Vídeo: **${videoSorteado.nome}** | Segundo: **${tempo}**`,
+                        content: `🎮 Segundo sorteado: **${tempo}** (Dica: A imagem está com zoom aleatório!)`,
                         files: [{
-                            attachment: stdoutBuffer,
-                            name: "frame.png"
+                            attachment: imagemComZoomBuffer,
+                            name: "frame_zoom.png"
                         }]
-                    }).then(() => {
-                        msgProcessando.delete().catch(() => {});
-                    });
-                });
+                    }).catch(errDiscord => console.error("Erro ao enviar no Discord:", errDiscord));
+
+                } catch (errSharp) {
+                    console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
+                    return processarVideo(tentativas + 1);
+                }
             });
         });
-    });
+    }
+
+    message.channel.send("🔄 Puxando o vídeo, aplicando zoom e gerando o desafio...").then(msgProcessando => {
+        processarVideo();
+        msgProcessando.delete().catch(() => {});
+    }).catch(console.error);
 }
