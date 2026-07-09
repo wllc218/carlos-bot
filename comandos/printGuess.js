@@ -87,6 +87,11 @@ export function execute(message) {
                         }]
                     });
 
+                    if (msgProcessando) {
+                        clearInterval(cronometroCarregando);
+                        msgProcessando.delete().catch(() => {});
+                    }
+
                     if (msgProcessando) msgProcessando.delete().catch(() => {});
 
                     // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)
@@ -119,7 +124,19 @@ export function execute(message) {
         });
     }
 
-    message.channel.send("🔄 CARGANDO...").then(msgProcessando => {
-        processarVideo(msgProcessando);
+message.channel.send("🔄 CARGANDO .").then(msgProcessando => {
+        let pontos = 1;
+
+        // Inicia o intervalo de 1 segundo para atualizar o "CARREGANDO . . ."
+        const cronometroCarregando = setInterval(async () => {
+            pontos++;
+            const sufixoPontos = " .".repeat(pontos);
+            
+            await msgProcessando.edit(`🔄 CARREGANDO${sufixoPontos}`).catch(() => {});
+        }, 1000);
+
+        // Dispara a função principal injetando a mensagem e o cronômetro dela
+        processarVideo(msgProcessando, cronometroCarregando);
+        
     }).catch(console.error);
 }
