@@ -21,14 +21,16 @@ const userSchema = new Schema({
     },
   ],
 
-  vitorias: [
-    {
-      dialogo: Number,
-      default: 0,
-      print: Number,
+  vitorias: {
+    dialogo: {
+      type: Number,
       default: 0,
     },
-  ],
+    print: {
+      type: Number,
+      default: 0,
+    },
+  },
 });
 
 export default model("users", userSchema);
