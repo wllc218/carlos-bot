@@ -5,9 +5,7 @@ import videos from "../data/videos.json" with { type: "json" };
 
 export const name = "printguess";
 export function execute(message) {
-    // 1. TRANSFORMA O OBJETO EM UMA LISTA ÚNICA DE VÍDEOS
-    // Junta todas as categorias ("sonicexe", "carlostale", etc.) em um único lugar
-    console.log("CONTEÚDO DO JSON CARREGADO:", videos);
+    // 1. JUNTA TODOS OS VÍDEOS
     const todosOsVideos = [];
     for (const categoria in videos) {
         if (Array.isArray(videos[categoria])) {
@@ -19,57 +17,64 @@ export function execute(message) {
         return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
     }
 
-    // 2. SORTEIO DO VÍDEO
-    const videoSorteado = todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
-    const linkVideo = videoSorteado.url;
+    // 2. TESTE DE SISTEMA: VERIFICA SE O FFPROBE EXISTE NA MÁQUINA
+    exec("ffprobe -version", (errVersion) => {
+        if (errVersion) {
+            return message.reply(
+                "❌ **ERRO DE SISTEMA:** O programa `ffprobe` não está instalado na hospedagem do seu bot! " +
+                "Você precisa instalar o FFmpeg/FFprobe no sistema operacional do servidor para que o comando funcione."
+            );
+        }
 
-    // Envia o aviso de processamento no chat
-    message.channel.send("🔄 Puxando o vídeo da nuvem e gerando o print...").then(msgProcessando => {
+        // Se o ffprobe existe, escolhe um vídeo e tenta ler
+        const videoSorteado = todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
+        const linkVideo = videoSorteado.url;
 
-        // 3. BUSCA AS INFORMAÇÕES DO VÍDEO ONLINE (FFPROBE SEGURO)
-        exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { maxBuffer: 1024 * 1024 }, (err, stdout) => {
-            if (err) {
-                msgProcessando.delete().catch(() => {});
-                return message.reply("❌ Erro ao ler as propriedades do vídeo na nuvem.");
-            }
+        message.channel.send(`🔄 Testando conexão com o vídeo: **${videoSorteado.nome}**...`).then(msgProcessando => {
 
-            const dados = stdout.trim().split("\n");
-            const duracao = parseFloat(dados[2]);
-            
-            if (isNaN(duracao)) {
-                msgProcessando.delete().catch(() => {});
-                return message.reply("❌ Não foi possível calcular a duração do vídeo sorteado.");
-            }
-
-            const tempo = Math.floor(Math.random() * duracao);
-
-            // 4. FFMPEG ULTRA OTIMIZADO NA MEMÓRIA (BUFFER)
-            // O traço "-" no final joga a imagem direto na memória RAM.
-            // maxBuffer configurado para 20MB (1024 * 1024 * 20) para dar total folga ao processo.
-            const ffmpegComando = `ffmpeg -y -ss ${tempo} -i "${linkVideo}" -frames:v 1 -f image2pipe -vcodec png -`;
-            
-            exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 20 }, (err2, stdoutBuffer) => {
-                if (err2) {
+            // 3. EXECUTA O FFPROBE NO VÍDEO
+            exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 8000 }, (err, stdout) => {
+                if (err) {
                     msgProcessando.delete().catch(() => {});
-                    console.error("Erro FFMPEG:", err2);
-                    return message.reply("❌ Erro ao processar o frame do vídeo.");
+                    console.error("ERRO DETALHADO DO FFPROBE:", err);
+                    return message.reply(
+                        `❌ **ERRO DE CONEXÃO:** O ffprobe está instalado, mas não conseguiu acessar o vídeo **${videoSorteado.nome}** na nuvem.\n` +
+                        `• Erro: \`${err.message.substring(0, 100)}...\`\n` +
+                        `• Verifique se o link funciona no seu navegador: ${linkVideo}`
+                    );
                 }
 
-                // 5. ENVIO SEGURO PARA O DISCORD
-                // Assim que o upload termina, a memória RAM é limpa instantaneamente.
-                message.reply({
-                    content: `🎮 Segundo sorteado: **${tempo}**`,
-                    files: [{
-                        attachment: stdoutBuffer,
-                        name: "frame.png"
-                    }]
-                }).then(() => {
-                    msgProcessando.delete().catch(() => {}); // Apaga o aviso de carregamento
-                }).catch(errDiscord => {
-                    console.error("Erro ao enviar no Discord:", errDiscord);
+                const dados = stdout.trim().split("\n");
+                const duracao = parseFloat(dados[2]);
+                
+                if (isNaN(duracao)) {
                     msgProcessando.delete().catch(() => {});
+                    return message.reply(`❌ O vídeo **${videoSorteado.nome}** retornou dados inválidos na nuvem.`);
+                }
+
+                const tempo = Math.floor(Math.random() * duracao);
+                const ffmpegComando = `ffmpeg -y -ss ${tempo} -i "${linkVideo}" -frames:v 1 -f image2pipe -vcodec png -`;
+                
+                // 4. EXECUTA O FFMPEG
+                exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 20, timeout: 10000 }, (err2, stdoutBuffer) => {
+                    if (err2) {
+                        msgProcessando.delete().catch(() => {});
+                        console.error("ERRO DETALHADO DO FFMPEG:", err2);
+                        return message.reply(`❌ O ffprobe leu o vídeo, mas o **ffmpeg** falhou ao tirar o print.`);
+                    }
+
+                    // Se tudo der certo
+                    message.reply({
+                        content: `✅ **Sucesso!** Vídeo: **${videoSorteado.nome}** | Segundo: **${tempo}**`,
+                        files: [{
+                            attachment: stdoutBuffer,
+                            name: "frame.png"
+                        }]
+                    }).then(() => {
+                        msgProcessando.delete().catch(() => {});
+                    });
                 });
             });
         });
-    }).catch(console.error);
+    });
 }
