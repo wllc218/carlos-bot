@@ -23,7 +23,7 @@ export function execute(message) {
         return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
     }
 
-    // AJUSTADO: Agora a função recebe corretamente o cronometroCarregando como segundo parâmetro
+    // Função interna para processamento - Recebe também o cronômetro para poder pará-lo
     function processarVideo(msgProcessando, cronometroCarregando, tentativas = 0) {
         if (tentativas >= 3) {
             if (msgProcessando) {
@@ -36,27 +36,35 @@ export function execute(message) {
         const videoSorteado = todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
         const linkVideo = videoSorteado.url;
 
-        // 2. BUSCA AS DIMENSÕES E DURAÇÃO REAL DO VÍDEO (FAST SEEKING)
-        exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 5000 }, (err, stdout) => {
+        // 2. BUSCA AS DIMENSÕES, DURAÇÃO REAL E TAXA DE FRAMES (FPS) DO VÍDEO
+        exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 5000 }, (err, stdout) => {
             if (err) {
                 console.error(`[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro...`);
-                return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
+                return processarVideo(msgProcessando, cronometroCarregando, tentatives + 1);
             }
 
             const dados = stdout.trim().split("\n");
             const larguraOriginal = parseInt(dados[0]);
             const alturaOriginal = parseInt(dados[1]);
-            const duracao = parseFloat(dados[2]);
             
-            if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(duracao)) {
+            // Tratamento da taxa de frames (r_frame_rate vem em formato de fração, ex: "30/1" ou "60000/1001")
+            const expressaoFps = dados[2].split("/");
+            const fps = parseFloat(expressaoFps[0]) / parseFloat(expressaoFps[1]);
+            
+            const duracao = parseFloat(dados[3]);
+            
+            if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(fps) || isNaN(duracao)) {
                 return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
             }
 
-            const tempo = Math.floor(Math.random() * duracao);
-            const ffmpegComando = `ffmpeg -y -ss ${tempo} -i "${linkVideo}" -frames:v 1 -f image2pipe -vcodec png -`;
+            // Calcula o total de frames aproximados do vídeo e sorteia um frame específico
+            const totalDeFrames = Math.floor(duracao * fps);
+            const frameSorteado = Math.floor(Math.random() * totalDeFrames);
+
+            // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM (Otimizado: Sem áudio e em formato BMP)
+            const ffmpegComando = `ffmpeg -y -skip_frame nokey -i "${linkVideo}" -vf "select=eq(n\\,${frameSorteado})" -frames:v 1 -an -f image2pipe -vcodec bmp -`;
             
-            // 3. EXTRAI O FRAME ORIGINAL NA MEMÓRIA RAM
-            exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 20, timeout: 7000 }, async (err2, stdoutBuffer) => {
+            exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 }, async (err2, stdoutBuffer) => {
                 if (err2) {
                     console.error(`[Erro FFMPEG] Falha ao extrair frame do vídeo: ${videoSorteado.nome}. Tentando outro...`);
                     return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
@@ -95,7 +103,7 @@ export function execute(message) {
                         msgProcessando.delete().catch(() => {});
                     }
 
-                    // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)
+                    // 7. COLETOR DE MENSAGENS INDEFINIDO
                     const filtroChat = (m) => !m.author.bot;
                     const coletorChat = message.channel.createMessageCollector({ filter: filtroChat });
 
@@ -103,13 +111,12 @@ export function execute(message) {
                         const respostaUsuario = msgPretendente.content.trim().toLowerCase();
                         const respostaCorreta = videoSorteado.categoriaNome.toLowerCase();
 
-                        // Resposta imediata se acertar
+                        // Resposta imediata se acertar (Modificado para mostrar o Frame exato)
                         if (respostaUsuario === respostaCorreta) {
                             coletorChat.stop(); 
-                            return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Segundo exato: **${tempo}s**`);
+                            return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`);
                         } 
                         
-                        // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
                         if (categoriasDisponiveis.map(c => c.toLowerCase()).includes(respostaUsuario)) {
                             msgPretendente.reply("❌ ERROU BURRO DO CARALHO").then(m => {
                                 setTimeout(() => m.delete().catch(() => {}), 2500);
@@ -128,7 +135,6 @@ export function execute(message) {
     message.channel.send("🔄 CARGANDO .").then(msgProcessando => {
         let pontos = 1;
 
-        // Inicia o intervalo de 1 segundo para atualizar o "CARGANDO . . ."
         const cronometroCarregando = setInterval(async () => {
             pontos++;
             const sufixoPontos = " .".repeat(pontos);
@@ -136,7 +142,6 @@ export function execute(message) {
             await msgProcessando.edit(`🔄 CARGANDO${sufixoPontos}`).catch(() => {});
         }, 1000);
 
-        // Dispara a função principal injetando a mensagem e o cronômetro dela corretamente
         processarVideo(msgProcessando, cronometroCarregando);
         
     }).catch(console.error);
