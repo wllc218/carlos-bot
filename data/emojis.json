@@ -1,0 +1,241 @@
+{
+    "emojis": [
+        {
+            "nome": "bosta",
+            "emojiId": "bosta",
+            "reactions": ["bosta", "bosta", "bostas", "bostinha", "bostinhas", "bostola", "bostolas", "bostão", "bostoes", "bostões", "embostado", "embostada", "bostear", "bostejar", "bostejando", "bostejo", "bostuda", "bostudo", "merda", "merdas", "merdinha", "merdola", "caguei", "cagando", "cagou", "cagar"],
+            "raridade": "comum",
+            "discordId": "1390108899863957747",
+            "discordName": "oi",
+            "cor": "#FF6F61"
+        },
+        {
+            "nome": "Ellie",
+            "emojiId": "ellie",
+            "raridade": "comum",
+            "discordId": "1437135166312026305",
+            "discordName": "ne",
+            "cor": "#6B5B95"
+        },
+        {
+            "nome": "Benicio",
+            "emojiId": "benicio",
+            "raridade": "comum",
+            "discordId": "1441181952114823289",
+            "discordName": "benicio",
+            "cor": "#F7CAC9"
+        },
+        {
+            "nome": "Deku",
+            "emojiId": "deku",
+            "reactions": ["right", "daddy", "done", "come back", "here"],
+            "raridade": "raro",
+            "discordId": "1407125652322123826",
+            "discordName": "DADDYISNTDONESP",
+            "cor": "#034F84"
+        },
+        {
+            "nome": "Johnkler",
+            "emojiId": "johnkler",
+            "reactions": ["why so serious"],
+            "raridade": "raro",
+            "discordId": "1390104123357003806",
+            "discordName": "john_kler",
+            "cor": "#FFB447"
+        },
+        {
+            "nome": "PIGS",
+            "emojiId": "pigs",
+            "raridade": "raro",
+            "discordId": "1438015083895591164",
+            "discordName": "pigs",
+            "cor": "#FF7F50"
+        },
+        {
+            "nome": "Geometry sash",
+            "emojiId": "geometry_sash",
+            "reactions": ["geometry", "dash", "sash", "geomerey", "gd", "geometria"],
+            "raridade": "raro",
+            "discordId": "1430594895088713858",
+            "discordName": "GOMETRYSASH",
+            "cor": "#00A4CC"
+        },
+        {
+            "nome": "Demencia",
+            "emojiId": "demencia",
+            "reactions": ["dem", "leyte", "leite", "demencia", "dementia", "doida", "maluca", "psicopata", "duente", "doente", "louca", "milk"],
+            "raridade": "epico",
+            "discordId": "1392605726786191441",
+            "discordName": "leyte",
+            "cor": "#00A4CC"
+        },
+        {
+            "nome": "Sissyphus",
+            "emojiId": "sissyphus",
+            "reactions": ["YES[S]*", "THATS IT", "keep em coming"],
+            "raridade": "epico",
+            "discordId": "1481109255355367455",
+            "discordName": "sisycus",
+            "cor": "#00A4CC"
+        },
+        {
+            "nome": "SONIC. EXE",
+            "emojiId": "sonic_exe",
+            "reactions": ["eles", "elas", "TA[A]*KE", "THA[A]*T", "LETS DO THIS", "YES", "HAH[AH]*", "TAKE", "CAPUHA", "PAPUHA", "PREPARE FOR", "Sonic", ". exe", "THI[I]*S[S]*"],
+            "raridade": "epico",
+            "discordId": "1497972408391434462",
+            "discordName": "oie",
+            "cor": "#0041c2"
+        },
+        {
+            "nome": "Seisete",
+            "emojiId": "seisete",
+            "reactions": ["67", "seis sete", "six seven"],
+            "raridade": "mitico",
+            "discordId": "1441569985674743829",
+            "discordName": "seisete",
+            "cor": "#E94B3C"
+        },
+        {
+            "nome": "Ainda água",
+            "emojiId": "ainda_agua",
+            "reactions": ["sigma", "mango", "those who knows", "aqueles que sabem", "agua", "aura"],
+            "raridade": "mitico",
+            "discordId": "1390104307738869811",
+            "discordName": "ainda",
+            "cor": "#7FB069"
+        },
+        {
+            "nome": "Pikimin",
+            "emojiId": "pikimin",
+            "raridade": "mitico",
+            "discordId": "1168223527929917560",
+            "discordName": "emoji_27",
+            "cor": "#F7786B"
+        },
+        {
+            "nome": "Senta",
+            "emojiId": "senta",
+            "reactions": ["aqui", "ali", "la", "isso", "aquilo", "acula", "cade", "aonde", "this", "there", "here"],
+            "raridade": "epico",
+            "discordId": "1227090538399006841",
+            "discordName": "dT45bo6yc",
+            "cor": "#B565A7"
+        },
+        {
+            "nome": "M&L",
+            "emojiId": "ml",
+            "reactions": ["m&l", "mario", "luigi"],
+            "raridade": "mitico",
+            "discordId": "1175490307454935102",
+            "discordName": "tres",
+            "cor": "#345995"
+        },
+        {
+            "nome": "Regina",
+            "emojiId": "regina",
+            "reactions": ["regina", "vagina", "GO", "buceta", "prikito", "prikituda"],
+            "raridade": "lendario",
+            "discordId": "1390109875089965228",
+            "discordName": "vagina",
+            "cor": "#E6A157"
+        },
+        {
+            "nome": "Shappy",
+            "emojiId": "shappy",
+            "reactions": ["feliz", "pabens", "happy"],
+            "raridade": "lendario",
+            "discordId": "1392167699857145987",
+            "discordName": "steamhave",
+            "cor": "#3AA17E"
+        },
+        {
+            "nome": "Menuina",
+            "emojiId": "menuina",
+            "reactions":["nos", "agente", "vamos", "vamo", "gente", "iremos", "somos", "nossas", "5", "cinco", "five", "menuina", "menina", "ja viu", "ja viram", "olho", "olhos"],
+            "raridade": "lendario",
+            "discordId": "1415817551333818550",
+            "discordName": "vocejaviuessameniuna",
+            "cor": "#D65076"
+        },
+        {
+            "nome": "BOMBA",
+            "emojiId": "bomba",
+            "raridade": "lendario",
+            "discordId": "1167645969878352024",
+            "discordName": "channels4_profile",
+            "cor": "#0B6E4F"
+        },
+        {
+            "nome": "Moça",
+            "emojiId": "moca",
+            "reactions": ["moca", "xebiu", "mulher", "puta", "foid", "vagabunda", "fudida", "ela", "cagona", "feia", "desgraçada", "vaca", "dela", "nela", "cadela", "cachorra", "loira", "bonita", "linda", "gostosa", "peituda", "bunduda", "magnifica", "estupida", "burra", "vadia", "merdalher", "bitch", "senhorita", "senhora", "prostituta", "diva", "perfeita", "divonica", "babilonica", "mana", "faraonica", "labubonica", "tesuda", "bucetuda", "piranha", "piranhuda", "woman", "she", "her", "hoe"],
+            "raridade": "lendario",
+            "discordId": "1390104833092096091",
+            "discordName": "moca",
+            "cor": "#0B6E4F"
+        },
+        {
+            "nome": "Lucas",
+            "emojiId": "lucas",
+            "reactions": ["lucas", "prjooj", "luque", "3", "três", "three", "branco", "branca", "white"],
+            "raridade": "cromatico",
+            "discordId": "1390114953582870833",
+            "discordName": "lucas",
+            "cor": "#FF9A8B"
+        },
+        {
+            "nome": "Nicolas",
+            "emojiId": "nicolas",
+            "reactions": ["escuro", "nicolas", "rob", "robique", "negro", "nigga", "nigger", "preto", "4", "quatro", "Four", "negros"],
+            "raridade": "cromatico",
+            "discordId": "1390110593721040966",
+            "discordName": "nicolas",
+            "cor": "#6C5B7B"
+        },
+        {
+            "nome": "Wallace",
+            "emojiId": "wallace",
+            "reactions":  ["wallace", "walface", "cabeça", "2", "dois", "two", "cearense", "gay"],
+            "raridade": "cromatico",
+            "discordId": "1390110948127146086",
+            "discordName": "wallace",
+            "cor": "#2A9D8F"
+        },
+        {
+            "nome": "Carlos",
+            "emojiId": "carlos",
+            "reactions": ["carlos", "deyvid", "1", "um", "one", "sapo", "perereca", "barros", "cabos", "vitor", "de jesus", "cagao"],
+            "raridade": "cromatico",
+            "discordId": "1390110742971289632",
+            "discordName": "carlos",
+            "cor": "#B3DE69"
+        },
+        {
+            "nome": "Theo",
+            "emojiId": "theo",
+            "reactions": ["theo", "6", "seis", "six"],
+            "raridade": "cromatico",
+            "discordId": "1390110538993766421",
+            "discordName": "theo",
+            "cor": "#845EC2"
+        },
+        {
+            "nome": "SONIC. EXE PRIME",
+            "emojiId": "sonic_exe_prime",
+            "reactions": ["HAH[AH]*", "NIGGARLAS", "niggalas"],
+            "raridade": "cromatico",
+            "discordId": "1505684509591339208",
+            "discordName": "dsd",
+            "cor": "#0041c2"
+        },
+        {
+            "nome": "Lavinia",
+            "emojiId": "lavinia",
+            "raridade": "Lavinia",
+            "discordId": "1078845696322584706",
+            "discordName": "unknown2",
+            "cor": "#845EC2"
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "bot_carlos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.4.2",
+    "mongoose": "^9.6.2",
+    "sharp": "^0.34.5",
+    "wokcommands": "^2.1.9"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
