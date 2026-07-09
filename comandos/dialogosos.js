@@ -1,6 +1,6 @@
 import dialogos from "../data/dialoguess.json" with { type: "json" };
 import { EmbedBuilder } from "discord.js";
-import User from "../server/schemas/user-schema.js"
+import User from "../server/schemas/user-schema.js";
 
 let jogoAtivo = false;
 
@@ -46,9 +46,6 @@ export async function execute(message) {
       if (bloco.thumb) {
         final.setThumbnail(bloco.thumb);
       }
-
-      const user = await User.findById(message.author.id);
-
 
       message.channel.send({ embeds: [final] });
       jogoAtivo = false;
