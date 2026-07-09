@@ -1,7 +1,7 @@
 import { getMaximo } from "./numeroMax.js";
-
 import { EmbedBuilder } from "discord.js";
-export const name = "numerao";
+import User from "../../../server/schemas/user-schema.js";
+export const name = "numeroguess";
 export async function execute(message) {
   let tentativas = 0;
   let historico = "";
@@ -48,7 +48,7 @@ export async function execute(message) {
 
     let linha = "";
 
-    numeroQuebrado.forEach((num, index) => {
+    numeroQuebrado.forEach(async (num, index) => {
       if (num === numeroUsuario[index]) {
         linha += "🟩";
       } else if (Math.abs(Number(num) - Number(numeroUsuario[index])) <= 2) {
@@ -64,6 +64,10 @@ export async function execute(message) {
 
     // Acertou
     if (msg.content === numeroFinal.toString()) {
+      const user = await User.findById(message.author.id);
+      user.vitorias.numeroGuess++;
+      await user.save();
+
       const embedVitoria = new EmbedBuilder()
         .setTitle("🎉🎉🎉 YESSSSSSSSSSSSSSSSSSSSSSSSSS.")
         .setDescription(
