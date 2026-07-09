@@ -5,11 +5,16 @@ import videos from "../data/videos.json" with { type: "json" };
 
 export const name = "printguess";
 export function execute(message) {
-    // 1. TRANSFORMA O OBJETO EM UMA LISTA ÚNICA DE VÍDEOS
+    // 1. TRANSFORMA O OBJETO EM UMA LISTA ÚNICA, INCLUINDO A CATEGORIA EM CADA VÍDEO
     const todosOsVideos = [];
     for (const categoria in videos) {
         if (Array.isArray(videos[categoria])) {
-            todosOsVideos.push(...videos[categoria]);
+            // Mapeia os vídeos injetando a propriedade "categoriaNome" em cada um deles
+            const videosComCategoria = videos[categoria].map(video => ({
+                ...video,
+                categoriaNome: categoria
+            }));
+            todosOsVideos.push(...videosComCategoria);
         }
     }
 
@@ -56,28 +61,25 @@ export function execute(message) {
 
                 try {
                     // 4. CÁLCULO DO ZOOM ALEATÓRIO (De 2/4 até quase zoom total de 4/4)
-                    // Fator varia de 0.1 (zoom máximo, pegando 10% da tela) até 0.5 (zoom médio, pegando 2/4 da tela)
                     const fatorZoom = 0.1 + Math.random() * 0.4; 
                     
                     const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
                     const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
 
-                    // Sorteia a posição X e Y de onde o corte vai acontecer na tela de forma imprevisível
                     const xAleatorio = Math.floor(Math.random() * (larguraOriginal - larguraCorte));
                     const yAleatorio = Math.floor(Math.random() * (alturaOriginal - alturaCorte));
 
                     // 5. SHARP APLICA O RECORTE E ESTICA A IMAGEM NA RAM
                     const imagemComZoomBuffer = await sharp(stdoutBuffer)
                         .extract({ left: xAleatorio, top: yAleatorio, width: larguraCorte, height: alturaCorte })
-                        .resize(larguraOriginal, alturaOriginal) // Estica de volta criando o efeito de lente de aproximação
+                        .resize(larguraOriginal, alturaOriginal)
                         .toBuffer();
 
-                    // Calcula a porcentagem visual aproximada do zoom para mandar no chat
                     const porcentagemZoom = Math.round((1 - fatorZoom) * 100);
 
-                    // 6. ENVIA PARA O DISCORD EXIBINDO O NOME DO VÍDEO E DELETA A MENSAGEM DE CARREGANDO
+                    // 6. ENVIA PARA O DISCORD EXIBINDO A CATEGORIA, NOME E DELETA O CARREGANDO
                     message.reply({
-                        content: `🎮 **Desafio Gerado!**\n• Vídeo: **${videoSorteado.nome}**\n• Segundo sorteado: **${tempo}s**\n• Intensidade do Zoom: ~**${porcentagemZoom}%**`,
+                        content: `🎮 **Desafio Gerado!**\n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo: **${videoSorteado.nome}**\n• Segundo sorteado: **${tempo}s**\n• Intensidade do Zoom: ~**${porcentagemZoom}%**`,
                         files: [{
                             attachment: imagemComZoomBuffer,
                             name: "desafio_zoom.png"
@@ -91,13 +93,12 @@ export function execute(message) {
 
                 } catch (errSharp) {
                     console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
-                    return processarVideo(msgProcessando, tentatives + 1);
+                    return processarVideo(msgProcessando, tentativas + 1);
                 }
             });
         });
     }
 
-    // Cria a mensagem inicial e passa o controle dela para a função principal
     message.channel.send("🔄 Puxando o vídeo da nuvem e aplicando o efeito de zoom extremo...").then(msgProcessando => {
         processarVideo(msgProcessando);
     }).catch(console.error);
