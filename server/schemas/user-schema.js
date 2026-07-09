@@ -22,11 +22,15 @@ const userSchema = new Schema({
   ],
 
   vitorias: {
-    dialogo: {
+    dialoGuess: {
       type: Number,
       default: 0,
     },
-    print: {
+    printGuess: {
+      type: Number,
+      default: 0,
+    },
+    numeroGuess: {
       type: Number,
       default: 0,
     },

@@ -39,7 +39,7 @@ export async function execute(message) {
     // ACERTOU
     if (resposta === nomeObra) {
       const user = await User.findById(message.author.id);
-      user.vitorias.dialogo++;
+      user.vitorias.dialoGuess++;
       await user.save();
 
       const final = new EmbedBuilder()

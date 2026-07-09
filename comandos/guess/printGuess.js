@@ -134,7 +134,7 @@ export function execute(message) {
                 if (respostaUsuario === respostaCorreta) {
                   coletorChat.stop();
                   const user = await User.findById(message.author.id);
-                  user.vitorias.print++;
+                  user.vitorias.printGuess++;
                   await user.save();
 
                   return message.channel.send(
