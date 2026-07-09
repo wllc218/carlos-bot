@@ -5,8 +5,10 @@ import videos from "../data/videos.json" with { type: "json" };
 
 export const name = "printguess";
 export function execute(message) {
-    // 1. TRANSFORMA O OBJETO EM UMA LISTA ÚNICA, INCLUINDO A CATEGORIA EM CADA VÍDEO
+    // 1. MAPEIA AS CATEGORIAS E TRANSFORMA EM UMA LISTA ÚNICA DE VÍDEOS
+    const categoriasDisponiveis = Object.keys(videos);
     const todosOsVideos = [];
+    
     for (const categoria in videos) {
         if (Array.isArray(videos[categoria])) {
             const videosComCategoria = videos[categoria].map(video => ({
@@ -74,10 +76,11 @@ export function execute(message) {
                         .toBuffer();
 
                     const porcentagemZoom = Math.round((1 - fatorZoom) * 100);
+                    const listaCategoriasTexto = categoriasDisponiveis.map(cat => `• **${cat}**`).join("\n");
 
-                    // 6. ETAPA 1: ENVIA O DESAFIO E ADICIONA AS REAÇÕES BASE NA IMAGEM
-                    const msgDesafio = await message.reply({
-                        content: `🎮 **DESAFIO GAMER**\n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo: **${videoSorteado.nome}**\n• Segundo sorteado: **${tempo}s**\n• Intensidade do Zoom: ~**${porcentagemZoom}%**\n\nReaja abaixo com seu palpite inicial!`,
+                    // 6. ENVIA O DESAFIO NO CHAT
+                    await message.reply({
+                        content: `🎮 **DESAFIO PRINTGUESS**\nDe qual categoria é essa imagem com zoom?\n\n**Categorias Disponíveis:**\n${listaCategoriasTexto}\n\n• Intensidade do Zoom: ~**${porcentagemZoom}%**\n\n✍️ *Digite o nome correto da categoria no chat para vencer!*`,
                         files: [{
                             attachment: imagemComZoomBuffer,
                             name: "desafio_zoom.png"
@@ -86,88 +89,31 @@ export function execute(message) {
 
                     if (msgProcessando) msgProcessando.delete().catch(() => {});
 
-                    const emojisIniciais = ["❤️", "⭐", "🔮", "🌀"];
-                    for (const emoji of emojisIniciais) {
-                        await msgDesafio.react(emoji).catch(console.error);
-                    }
+                    // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)
+                    const filtroChat = (m) => !m.author.bot;
+                    const coletorChat = message.channel.createMessageCollector({ filter: filtroChat });
 
-                    // Map para registrar a escolha inicial de cada ID de usuário
-                    const escolhasUsuarios = new Map();
+                    coletorChat.on("collect", (msgPretendente) => {
+                        const respostaUsuario = msgPretendente.content.trim().toLowerCase();
+                        const respostaCorreta = videoSorteado.categoriaNome.toLowerCase();
 
-                    const filtroEtapa1 = (reaction, user) => emojisIniciais.includes(reaction.emoji.name) && !user.bot;
-                    const coletorEtapa1 = msgDesafio.createReactionCollector({ filter: filtroEtapa1, time: 5000 });
-
-                    coletorEtapa1.on("collect", async (reaction, user) => {
-                        const idUsuario = user.id;
-                        if (escolhasUsuarios.has(idUsuario)) {
-                            await reaction.users.remove(idUsuario).catch(() => {});
-                            return;
+                        // Resposta imediata se acertar
+                        if (respostaUsuario === respostaCorreta) {
+                            coletorChat.stop(); 
+                            return message.channel.send(`🎉 **PARABÉNS!** <@${msgPretendente.author.id}> acertou em cheio!\n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Segundo exato: **${tempo}s**`);
+                        } 
+                        
+                        // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
+                        if (categoriasDisponiveis.map(c => c.toLowerCase()).includes(respostaUsuario)) {
+                            msgPretendente.reply("❌ Resposta incorreta! Continue tentando...").then(m => {
+                                setTimeout(() => m.delete().catch(() => {}), 2500);
+                            });
                         }
-                        escolhasUsuarios.set(idUsuario, reaction.emoji.name);
                     });
-
-                    // 7. ETAPA 2: CRONÔMETRO DE 5 SEGUNDOS PARA UMA ÚNICA MENSAGEM GLOBAL
-                    setTimeout(async () => {
-                        try {
-                            coletorEtapa1.stop();
-
-                            // Pega o emoji de quem começou o jogo (quem enviou o comando) para usar como exemplo na mensagem
-                            const emojiDoAutor = escolhasUsuarios.get(message.author.id) || "❓";
-
-                            // Envia apenas UMA mensagem no canal para todo mundo interagir
-                            const msgSubmenu = await message.channel.send(
-                                `🍎 **Sub-opções liberadas!** O criador escolheu ${emojiDoAutor} <@${message.author.id}>. Escolham agora o complemento do palpite de vocês:`
-                            );
-
-                            const emojisSubmenu = ["🍌", "🍎", "🍐", "🍇"];
-                            for (const emoji of emojisSubmenu) {
-                                await msgSubmenu.react(emoji).catch(console.error);
-                            }
-
-                            // Lista para controlar quem já finalizou a Etapa 2
-                            const usuariosFinalizados = new Set();
-
-                            // Coletor global: qualquer um pode reagir, contanto que não seja robô
-                            const filtroEtapa2 = (reaction, user) => emojisSubmenu.includes(reaction.emoji.name) && !user.bot;
-                            const coletorEtapa2 = msgSubmenu.createReactionCollector({ filter: filtroEtapa2, time: 30000 });
-
-                            coletorEtapa2.on("collect", async (reaction, user) => {
-                                const idUsuario = user.id;
-
-                                // Se o usuário tentar clicar em mais de um emoji no submenu, remove o clique extra
-                                if (usuariosFinalizados.has(idUsuario)) {
-                                    await reaction.users.remove(idUsuario).catch(() => {});
-                                    return;
-                                }
-
-                                // Busca qual emoji este usuário específico escolheu lá na Etapa 1
-                                const emojiDaEtapa1 = escolhasUsuarios.get(idUsuario);
-
-                                // Se ele não votou na primeira etapa, não deixamos votar na segunda
-                                if (!emojiDaEtapa1) {
-                                    await reaction.users.remove(idUsuario).catch(() => {});
-                                    return message.channel.send(`⚠️ <@${idUsuario}>, você não participou da primeira etapa!`).then(m => setTimeout(() => m.delete().catch(() => {}), 3000));
-                                }
-
-                                // Marca que este usuário já concluiu seu palpite
-                                usuariosFinalizados.add(idUsuario);
-
-                                // Avisa o palpite completo de quem acabou de votar
-                                message.channel.send(`✅ <@${idUsuario}> finalizou o palpite! Combinação: ${emojiDaEtapa1} + ${reaction.emoji.name}`);
-                            });
-
-                            coletorEtapa2.on("end", () => {
-                                message.channel.send(`⏰ Fim do tempo de votação! O vídeo correto era: **${videoSorteado.nome}**`);
-                            });
-
-                        } catch (errSubmenu) {
-                            console.error("Erro ao enviar o submenu global:", errSubmenu);
-                        }
-                    }, 5000);
 
                 } catch (errSharp) {
                     console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
-                    return processarVideo(msgProcessando, tentatives + 1);
+                    return processarVideo(msgProcessando, tentativas + 1);
                 }
             });
         });
