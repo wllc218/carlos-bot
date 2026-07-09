@@ -80,7 +80,7 @@ export function execute(message) {
 
                     // 6. ENVIA O DESAFIO NO CHAT
                     await message.reply({
-                        content: `🎮 **DESAFIO PRINTGUESS**\nDe qual categoria é essa imagem com zoom?\n\n**Categorias Disponíveis:**\n${listaCategoriasTexto}\n\n• Intensidade do Zoom: ~**${porcentagemZoom}%**\n\n✍️ *Digite o nome correto da categoria no chat para vencer!*`,
+                        content: `🎮 **DESAFIO GAMER**\nQUAL O VIDEL DAI DA PRINT O NGC AI OLHA\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n• Intensidade do Zoom: ~**${porcentagemZoom}%**\n\n`,
                         files: [{
                             attachment: imagemComZoomBuffer,
                             name: "desafio_zoom.png"
@@ -100,12 +100,12 @@ export function execute(message) {
                         // Resposta imediata se acertar
                         if (respostaUsuario === respostaCorreta) {
                             coletorChat.stop(); 
-                            return message.channel.send(`🎉 **PARABÉNS!** <@${msgPretendente.author.id}> acertou em cheio!\n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Segundo exato: **${tempo}s**`);
+                            return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Segundo exato: **${tempo}s**`);
                         } 
                         
                         // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
                         if (categoriasDisponiveis.map(c => c.toLowerCase()).includes(respostaUsuario)) {
-                            msgPretendente.reply("❌ Resposta incorreta! Continue tentando...").then(m => {
+                            msgPretendente.reply("❌ ERROU BURRO DO CARALHO").then(m => {
                                 setTimeout(() => m.delete().catch(() => {}), 2500);
                             });
                         }
@@ -119,7 +119,7 @@ export function execute(message) {
         });
     }
 
-    message.channel.send("🔄 Puxando o vídeo da nuvem e aplicando o efeito de zoom extremo...").then(msgProcessando => {
+    message.channel.send("🔄 CARGANDO...").then(msgProcessando => {
         processarVideo(msgProcessando);
     }).catch(console.error);
 }
