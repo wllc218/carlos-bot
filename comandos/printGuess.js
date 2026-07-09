@@ -23,7 +23,7 @@ export function execute(message) {
         return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
     }
 
-    // Função interna para processamento - Recebe também o cronômetro para poder pará-lo
+    // Função interna para processamento - Recebe corretamente o cronômetro como segundo parâmetro
     function processarVideo(msgProcessando, cronometroCarregando, tentativas = 0) {
         if (tentativas >= 3) {
             if (msgProcessando) {
@@ -40,7 +40,7 @@ export function execute(message) {
         exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 5000 }, (err, stdout) => {
             if (err) {
                 console.error(`[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro...`);
-                return processarVideo(msgProcessando, cronometroCarregando, tentatives + 1);
+                return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
             }
 
             const dados = stdout.trim().split("\n");
@@ -50,7 +50,6 @@ export function execute(message) {
             // Tratamento da taxa de frames (r_frame_rate vem em formato de fração, ex: "30/1" ou "60000/1001")
             const expressaoFps = dados[2].split("/");
             const fps = parseFloat(expressaoFps[0]) / parseFloat(expressaoFps[1]);
-            
             const duracao = parseFloat(dados[3]);
             
             if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(fps) || isNaN(duracao)) {
@@ -61,9 +60,12 @@ export function execute(message) {
             const totalDeFrames = Math.floor(duracao * fps);
             const frameSorteado = Math.floor(Math.random() * totalDeFrames);
 
-            // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM (Otimizado: Sem áudio e em formato BMP)
-            const ffmpegComando = `ffmpeg -y -skip_frame nokey -i "${linkVideo}" -vf "select=eq(n\\,${frameSorteado})" -frames:v 1 -an -f image2pipe -vcodec bmp -`;
+            // CORREÇÃO AQUI: Transforma o frame sorteado em segundos exatos com 3 casas decimais
+            // Isso permite que o FFmpeg pule direto para o ponto certo do link de rede de forma ultra rápida
+            const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
+            const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec bmp -`;
             
+            // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
             exec(ffmpegComando, { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 }, async (err2, stdoutBuffer) => {
                 if (err2) {
                     console.error(`[Erro FFMPEG] Falha ao extrair frame do vídeo: ${videoSorteado.nome}. Tentando outro...`);
@@ -98,12 +100,13 @@ export function execute(message) {
                         }]
                     });
 
+                    // Limpa o intervalo e apaga a mensagem de carregamento
                     if (msgProcessando) {
                         clearInterval(cronometroCarregando);
                         msgProcessando.delete().catch(() => {});
                     }
 
-                    // 7. COLETOR DE MENSAGENS INDEFINIDO
+                    // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)
                     const filtroChat = (m) => !m.author.bot;
                     const coletorChat = message.channel.createMessageCollector({ filter: filtroChat });
 
@@ -111,12 +114,13 @@ export function execute(message) {
                         const respostaUsuario = msgPretendente.content.trim().toLowerCase();
                         const respostaCorreta = videoSorteado.categoriaNome.toLowerCase();
 
-                        // Resposta imediata se acertar (Modificado para mostrar o Frame exato)
+                        // Resposta imediata se acertar
                         if (respostaUsuario === respostaCorreta) {
                             coletorChat.stop(); 
                             return message.channel.send(`🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`);
                         } 
                         
+                        // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
                         if (categoriasDisponiveis.map(c => c.toLowerCase()).includes(respostaUsuario)) {
                             msgPretendente.reply("❌ ERROU BURRO DO CARALHO").then(m => {
                                 setTimeout(() => m.delete().catch(() => {}), 2500);
@@ -132,16 +136,19 @@ export function execute(message) {
         });
     }
 
+    // Envia a mensagem inicial de carregamento
     message.channel.send("🔄 CARGANDO .").then(msgProcessando => {
         let pontos = 1;
 
+        // Inicia o intervalo de 1 segundo para atualizar os pontos dinamicamente
         const cronometroCarregando = setInterval(async () => {
             pontos++;
             const sufixoPontos = " .".repeat(pontos);
             
-            await msgProcessando.edit(`🔄 CARGANDO${sufixoPontos}`).catch(() => {});
+            await msgProcessando.edit(`🔄 CARREGANDO${sufixoPontos}`).catch(() => {});
         }, 1000);
 
+        // Dispara a função principal injetando a mensagem e o cronômetro dela
         processarVideo(msgProcessando, cronometroCarregando);
         
     }).catch(console.error);
