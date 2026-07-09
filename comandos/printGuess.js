@@ -90,7 +90,7 @@ export function execute(message) {
                         .toBuffer();
 
                     const porcentagemZoom = Math.round((1 - fatorZoom) * 100);
-                    const listaCategoriasTexto = Pattern.compile? categoriasDisponiveis.map(cat => `• **${cat}**`).join("\n") : categoriasDisponiveis.map(cat => `• **${cat}**`).join("\n");
+                    const listaCategoriasTexto = categoriasDisponiveis.map(cat => `• **${cat}**`).join("\n");
 
                     // 6. ENVIA O DESAFIO NO CHAT
                     await message.reply({
@@ -147,7 +147,7 @@ export function execute(message) {
 
                 } catch (errSharp) {
                     console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
-                    return processarVideo(msgProcessando, cronometroCarregando, tentatives + 1);
+                    return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
                 }
             });
         });
