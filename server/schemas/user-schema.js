@@ -4,7 +4,6 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-
   messageCount: {
     type: Number,
     default: 0,
@@ -14,6 +13,13 @@ const userSchema = new Schema({
     type: Number,
     default: 0,
   },
+
+  emojis: [
+    {
+      emojiId: String,
+      quantidade: Number,
+    },
+  ],
 });
 
 export default model("users", userSchema);

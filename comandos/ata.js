@@ -5,7 +5,7 @@ export function execute(message, args) {
   if (!args.length) {
     return message.reply("ESCREVE ALGUMA COISA PORR");
   }
-  if (args[0].toLowerCase() === "quem") {
+  if (args[0].toLowerCase() === "quem" || args[0].toLowerCase() === "qm") {
     mensagem = falas.quem;
   } else {
     mensagem = falas.normal;

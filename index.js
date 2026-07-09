@@ -1,12 +1,18 @@
-import dotenv from "dotenv";
-import { readdirSync } from "fs";
+import {
+  Client,
+  GatewayIntentBits,
+  ActivityType,
+  Collection,
+} from "discord.js";
+import connectDB from "./server/mongo.js";
 import mongoose from "mongoose";
+import { readdirSync, statSync } from "fs";
+import { join } from "path";
 import messageCount from "./comandos/message-counter.js";
 //prettier-ignore
-import {Client, GatewayIntentBits, ActivityType, Collection} from "discord.js";
 //prettier-ignore
 const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
-import connectDB from "./server/mongo.js";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -29,12 +35,26 @@ client.on("messageCreate", async (message) => {
 });
 
 //comandos
+
+function getCommandFiles(dir) {
+  const files = [];
+
+  for (const item of readdirSync(dir)) {
+    const caminho = join(dir, item);
+    if (statSync(caminho).isDirectory()) {
+      files.push(...getCommandFiles(caminho));
+    } else if (item.endsWith(".js")) {
+      files.push(caminho);
+    }
+  }
+
+  return files;
+}
+
 client.commands = new Collection();
-const commandFiles = readdirSync("./comandos").filter((file) =>
-  file.endsWith(".js"),
-);
+const commandFiles = getCommandFiles("./comandos");
 for (const file of commandFiles) {
-  const command = await import(`./comandos/${file}`);
+  const command = await import(`./${file.replace(/\\/g, "/")}`);
   if (!command.name) {
     console.log(`Comando ${file} sem nome.`);
     continue;
