@@ -3,6 +3,7 @@ import path from "path";
 import sharp from "sharp";
 import videos from "../../data/videos.json" with { type: "json" };
 import User from "../../server/schemas/user-schema.js";
+
 export const name = "printguess";
 export function execute(message) {
   // 1. MAPEIA AS CATEGORIAS E TRANSFORMA EM UMA LISTA ÚNICA DE VÍDEOS
@@ -44,10 +45,13 @@ export function execute(message) {
     const linkVideo = videoSorteado.url;
 
     // 2. BUSCA AS DIMENSÕES, DURAÇÃO REAL E TAXA DE FRAMES (FPS) DO VÍDEO
-    exec(`ffprobe -v error -nobuffer -analyzeduration 0 -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 100000 }, (err, stdout) => {
+    // CORREÇÃO: Removidas as flags de buffer que quebravam a leitura da nuvem e adicionado stderr
+    exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 12000 }, (err, stdout, stderr) => {
         if (err) {
           console.error(
-            `[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro...`,
+            `[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro... | Detalhes:`,
+            err.message,
+            stderr ? stderr.toString() : ""
           );
           return processarVideo(
             msgProcessando,
@@ -130,13 +134,11 @@ export function execute(message) {
                 .toBuffer();
 
               const porcentagemZoom = Math.round((1 - fatorZoom) * 100);
-              const listaCategoriasTexto = categoriasDisponiveis
-                .map((cat) => `• **${cat}**`)
-                .join("\n");
+              const listaCategoriasTexto = ReduzirCategorias(categoriasDisponiveis);
 
               // 6. ENVIA O DESAFIO NO CHAT
               await message.reply({
-                content: `🎮 **DESAFIO GAMER**\nQUAL O VIDEL DAI DA PRINT O NGC AI OLHA\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n\n\n`,
+                content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
                 files: [
                   {
                     attachment: imagemComZoomBuffer,
@@ -167,10 +169,13 @@ export function execute(message) {
                 // Resposta imediata se acertar
                 if (respostaUsuario === respostaCorreta) {
                   coletorChat.stop();
-                  const user = await User.findById(message.author.id);
-                  user.vitorias.printGuess++;
-                  await user.save();
-                  // Busca e atribui os pontos para quem acertou o desafio
+                  
+                  // CORREÇÃO: Pontuação vai para quem acertou (msgPretendente) usando a propriedade correta
+                  const user = await User.findById(msgPretendente.author.id);
+                  if (user && user.vitorias) {
+                    user.vitorias.printGuess++;
+                    await user.save();
+                  }
 
                   try {
                     // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
@@ -178,7 +183,7 @@ export function execute(message) {
                       await sharp(stdoutBuffer).toBuffer();
 
                     return message.channel.send({
-                      content: `🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
+                      content: `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
                       files: [
                         {
                           attachment: imagemOriginalBuffer,
@@ -191,9 +196,8 @@ export function execute(message) {
                       "[Erro Sharp] Falha ao gerar imagem de resposta:",
                       errResposta,
                     );
-                    // Fallback em texto caso a geração da resposta sem zoom falhe por segurança
                     return message.channel.send(
-                      `🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
+                      `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
                     );
                   }
                 }
@@ -205,7 +209,7 @@ export function execute(message) {
                     .includes(respostaUsuario)
                 ) {
                   msgPretendente
-                    .reply("❌ ERROU BURRO DO CARALHO")
+                    .reply("❌ ERROU!")
                     .then((m) => {
                       setTimeout(() => m.delete().catch(() => {}), 2500);
                     });
@@ -231,7 +235,6 @@ export function execute(message) {
     .then((msgProcessando) => {
       let pontos = 1;
 
-      // Inicia o intervalo de 1 segundo para atualizar os pontos dinamicamente
       const cronometroCarregando = setInterval(async () => {
         pontos++;
         const sufixoPontos = " .".repeat(pontos);
@@ -239,8 +242,11 @@ export function execute(message) {
         await msgProcessando.edit(`🔄 CARGANDO${sufixoPontos}`).catch(() => {});
       }, 1000);
 
-      // Dispara a função principal injetando a mensagem e o cronômetro dela
       processarVideo(msgProcessando, cronometroCarregando);
     })
     .catch(console.error);
+}
+
+function ReduzirCategorias(lista) {
+  return lista.map((cat) => `• **${cat}**`).join("\n");
 }
