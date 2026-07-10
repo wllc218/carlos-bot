@@ -19,6 +19,8 @@ dotenv.config();
 //faz o prefixo funcionar
 const prefix = "C!";
 
+console.log(process.version);
+
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(prefix)) return;
@@ -83,4 +85,17 @@ await connectDB();
 console.log("Token existe?", !!process.env.DISCORD_TOKEN);
 console.log("Tamanho:", process.env.DISCORD_TOKEN?.length);
 
-client.login(process.env.DISCORD_TOKEN);
+try {
+  await connectDB();
+  console.log("Mongo conectado");
+} catch (e) {
+  console.error("Erro Mongo:", e);
+}
+
+try {
+  console.log("Fazendo login...");
+  await client.login(process.env.DISCORD_TOKEN);
+  console.log("Login OK");
+} catch (e) {
+  console.error("Erro login:", e);
+}
