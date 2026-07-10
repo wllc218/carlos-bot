@@ -2,7 +2,10 @@ import { exec } from "child_process";
 import path from "path";
 import sharp from "sharp";
 import videos from "../../data/videos.json" with { type: "json" };
-import User from "../../server/schemas/user.schema.js";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pathUserSchema = path.resolve(process.cwd(), "server", "schemas", "user.schema.js");
+const User = require(pathUserSchema).default || require(pathUserSchema);
 
 export const name = "printguess";
 export function execute(message) {
