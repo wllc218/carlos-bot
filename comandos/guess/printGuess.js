@@ -50,7 +50,9 @@ export function execute(message) {
 
     // Validação de segurança
     if (isNaN(fps) || isNaN(duracao)) {
-      console.error(`[Aviso] O vídeo ${videoSorteado.nome} não possui 'fps' ou 'duracao' configurados no JSON.`);
+      console.error(
+        `[Aviso] O vídeo ${videoSorteado.nome} não possui 'fps' ou 'duracao' configurados no JSON.`,
+      );
       return processarVideo(
         msgProcessando,
         cronometroCarregando,
@@ -71,12 +73,16 @@ export function execute(message) {
     // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
     exec(
       ffmpegComando,
-      { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 },
-      async (err2, stdoutBuffer) => {
+      {
+        encoding: "buffer",
+        maxBuffer: 1024 * 1024 * 30,
+        timeout: 9000,
+      },
+      async (err2, stdoutBuffer, stderrBuffer) => {
         if (err2) {
-          console.error(
-            `[Erro FFMPEG] Falha ao extrair frame do vídeo: ${videoSorteado.nome}. Tentando outro...`,
-          );
+          console.error(err2);
+          console.error(stderrBuffer.toString());
+
           return processarVideo(
             msgProcessando,
             cronometroCarregando,
@@ -144,16 +150,13 @@ export function execute(message) {
           });
 
           coletorChat.on("collect", async (msgPretendente) => {
-            const respostaUsuario = msgPretendente.content
-              .trim()
-              .toLowerCase();
-            const respostaCorreta =
-              videoSorteado.categoriaNome.toLowerCase();
+            const respostaUsuario = msgPretendente.content.trim().toLowerCase();
+            const respostaCorreta = videoSorteado.categoriaNome.toLowerCase();
 
             // Resposta imediata se acertar
             if (respostaUsuario === respostaCorreta) {
               coletorChat.stop();
-              
+
               // Pontuação para quem acertou
               const user = await User.findById(msgPretendente.author.id);
               if (user && user.vitorias) {
@@ -192,11 +195,9 @@ export function execute(message) {
                 .map((c) => c.toLowerCase())
                 .includes(respostaUsuario)
             ) {
-              msgPretendente
-                .reply("❌ ERROU!")
-                .then((m) => {
-                  setTimeout(() => m.delete().catch(() => {}), 2500);
-                });
+              msgPretendente.reply("❌ ERROU!").then((m) => {
+                setTimeout(() => m.delete().catch(() => {}), 2500);
+              });
             }
           });
         } catch (errSharp) {
