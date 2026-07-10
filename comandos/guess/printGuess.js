@@ -24,7 +24,7 @@ export function execute(message) {
     return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
   }
 
-  // Função interna para processamento - Agora roda de forma instantânea
+  // Função interna para processamento - Rápida e imune a erros de tamanho
   function processarVideo(
     msgProcessando,
     cronometroCarregando,
@@ -44,13 +44,11 @@ export function execute(message) {
       todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
     const linkVideo = videoSorteado.url;
 
-    // 2. PEGA OS DADOS DIRETO DO JSON (Sem precisar rodar FFprobe na rede!)[cite: 1]
-    const larguraOriginal = videoSorteado.largura || 1920; 
-    const alturaOriginal = videoSorteado.altura || 1080;   
+    // Pega dados do JSON
     const fps = parseFloat(videoSorteado.fps);
     const duracao = parseFloat(videoSorteado.duracao);
 
-    // Validação de segurança caso você esqueça de preencher algum no JSON[cite: 1]
+    // Validação de segurança
     if (isNaN(fps) || isNaN(duracao)) {
       console.error(`[Aviso] O vídeo ${videoSorteado.nome} não possui 'fps' ou 'duracao' configurados no JSON.`);
       return processarVideo(
@@ -60,17 +58,17 @@ export function execute(message) {
       );
     }
 
-    // Calcula o total de frames aproximados do vídeo e sorteia um frame específico
+    // Calcula o total de frames aproximados e sorteia um frame específico
     const totalDeFrames = Math.floor(duracao * fps);
     const frameSorteado = Math.floor(Math.random() * totalDeFrames);
 
-    // Transforma o frame sorteado em segundos exatos para busca veloz via Fast Seeking (-ss)
+    // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // FORMATO ATUALIZADO: 'mjpeg' para compatibilidade total com buffers no Windows
+    // Formato mjpeg para extrair direto para a memória
     const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
 
-    // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM[cite: 1]
+    // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
     exec(
       ffmpegComando,
       { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 },
@@ -87,7 +85,16 @@ export function execute(message) {
         }
 
         try {
-          // 4. CÁLCULO DO ZOOM ALEATÓRIO (De 2/4 até zoom quase total de 4/4)
+          // CORREÇÃO: Lê as dimensões reais da imagem direto do buffer extraído!
+          const metadata = await sharp(stdoutBuffer).metadata();
+          const larguraOriginal = metadata.width;
+          const alturaOriginal = metadata.height;
+
+          if (!larguraOriginal || !alturaOriginal) {
+            throw new Error("Não foi possível ler as dimensões da imagem.");
+          }
+
+          // 4. CÁLCULO DO ZOOM ALEATÓRIO (Garante que nunca saia das dimensões reais)
           const fatorZoom = 0.1 + Math.random() * 0.4;
 
           const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
@@ -100,7 +107,7 @@ export function execute(message) {
             Math.random() * (alturaOriginal - alturaCorte),
           );
 
-          // 5. SHARP APLICA O RECORTE E ESTICA A IMAGEM NA RAM[cite: 1]
+          // 5. SHARP APLICA O RECORTE E ESTICA A IMAGEM NA RAM
           const imagemComZoomBuffer = await sharp(stdoutBuffer)
             .extract({
               left: xAleatorio,
@@ -113,7 +120,7 @@ export function execute(message) {
 
           const listaCategoriasTexto = ReduzirCategorias(categoriasDisponiveis);
 
-          // 6. ENVIA O DESAFIO NO CHAT[cite: 1]
+          // 6. ENVIA O DESAFIO NO CHAT
           await message.reply({
             content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
             files: [
@@ -130,7 +137,7 @@ export function execute(message) {
             msgProcessando.delete().catch(() => {});
           }
 
-          // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)[cite: 1]
+          // 7. COLETOR DE MENSAGENS INDEFINIDO
           const filtroChat = (m) => !m.author.bot;
           const coletorChat = message.channel.createMessageCollector({
             filter: filtroChat,
@@ -143,11 +150,11 @@ export function execute(message) {
             const respostaCorreta =
               videoSorteado.categoriaNome.toLowerCase();
 
-            // Resposta imediata se acertar[cite: 1]
+            // Resposta imediata se acertar
             if (respostaUsuario === respostaCorreta) {
               coletorChat.stop();
               
-              // Pontuação para quem acertou salvando na propriedade correta[cite: 1]
+              // Pontuação para quem acertou
               const user = await User.findById(msgPretendente.author.id);
               if (user && user.vitorias) {
                 user.vitorias.printGuess++;
@@ -155,7 +162,7 @@ export function execute(message) {
               }
 
               try {
-                // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM[cite: 1]
+                // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
                 const imagemOriginalBuffer =
                   await sharp(stdoutBuffer).toBuffer();
 
@@ -179,7 +186,7 @@ export function execute(message) {
               }
             }
 
-            // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)[cite: 1]
+            // Resposta imediata se errar
             if (
               categoriasDisponiveis
                 .map((c) => c.toLowerCase())
@@ -204,7 +211,7 @@ export function execute(message) {
     );
   }
 
-  // Envia a mensagem inicial de carregamento[cite: 1]
+  // Envia a mensagem inicial de carregamento
   message.channel
     .send("🔄 CARGANDO .")
     .then((msgProcessando) => {
@@ -222,6 +229,7 @@ export function execute(message) {
     .catch(console.error);
 }
 
+// Helper para formatar a lista de categorias no chat
 function ReduzirCategorias(lista) {
   return lista.map((cat) => `• **${cat}**`).join("\n");
 }
