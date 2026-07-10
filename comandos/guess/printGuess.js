@@ -2,7 +2,6 @@ import { exec } from "child_process";
 import path from "path";
 import sharp from "sharp";
 import videos from "../../data/videos.json" with { type: "json" };
-import User from "../../server/schemas/user-schema.js";
 
 export const name = "printguess";
 export function execute(message) {
@@ -24,10 +23,17 @@ export function execute(message) {
     return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
   }
 
-  // Função interna para processamento e tratamento de erros
-  function processarVideo(msgProcessando, tentativas = 0) {
+  // Função interna para processamento - Recebe corretamente o cronômetro como segundo parâmetro
+  function processarVideo(
+    msgProcessando,
+    cronometroCarregando,
+    tentativas = 0,
+  ) {
     if (tentativas >= 3) {
-      if (msgProcessando) msgProcessando.delete().catch(() => {});
+      if (msgProcessando) {
+        clearInterval(cronometroCarregando);
+        msgProcessando.delete().catch(() => {});
+      }
       return message.reply(
         "❌ Ocorreram erros seguidos ao tentar ler os vídeos na nuvem.",
       );
@@ -37,40 +43,68 @@ export function execute(message) {
       todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
     const linkVideo = videoSorteado.url;
 
-    // 2. BUSCA AS DIMENSÕES E DURAÇÃO REAL DO VÍDEO (FAST SEEKING)
+    // 2. BUSCA AS DIMENSÕES, DURAÇÃO REAL E TAXA DE FRAMES (FPS) DO VÍDEO
     exec(
-      `ffprobe -v error -select_streams v:0 -show_entries stream=width,height:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`,
-      { timeout: 45000 },
+      `ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`,
+      { timeout: 5000 },
       (err, stdout) => {
         if (err) {
           console.error(
             `[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro...`,
           );
-          return processarVideo(msgProcessando, tentativas + 1);
+          return processarVideo(
+            msgProcessando,
+            cronometroCarregando,
+            tentativas + 1,
+          );
         }
 
         const dados = stdout.trim().split("\n");
         const larguraOriginal = parseInt(dados[0]);
         const alturaOriginal = parseInt(dados[1]);
-        const duracao = parseFloat(dados[2]);
 
-        if (isNaN(larguraOriginal) || isNaN(alturaOriginal) || isNaN(duracao)) {
-          return processarVideo(msgProcessando, tentativas + 1);
+        // Tratamento da taxa de frames (r_frame_rate vem em formato de fração, ex: "30/1" ou "60000/1001")
+        const expressaoFps = dados[2].split("/");
+        const fps = parseFloat(expressaoFps[0]) / parseFloat(expressaoFps[1]);
+        const duracao = parseFloat(dados[3]);
+
+        if (
+          isNaN(larguraOriginal) ||
+          isNaN(alturaOriginal) ||
+          isNaN(fps) ||
+          isNaN(duracao)
+        ) {
+          return processarVideo(
+            msgProcessando,
+            cronometroCarregando,
+            tentativas + 1,
+          );
         }
 
-        const tempo = Math.floor(Math.random() * duracao);
-        const ffmpegComando = `ffmpeg -y -ss ${tempo} -i "${linkVideo}" -frames:v 1 -f image2pipe -vcodec png -`;
+        // Calcula o total de frames aproximados do vídeo e sorteia um frame específico
+        const totalDeFrames = Math.floor(duracao * fps);
+        const frameSorteado = Math.floor(Math.random() * totalDeFrames);
 
-        // 3. EXTRAI O FRAME ORIGINAL NA MEMÓRIA RAM
+        // Transforma o frame sorteado em segundos exatos para busca veloz via Fast Seeking (-ss)
+        const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
+
+        // FORMATO ATUALIZADO: 'mjpeg' para compatibilidade total com buffers no Windows
+        const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
+
+        // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
         exec(
           ffmpegComando,
-          { encoding: "buffer", maxBuffer: 1024 * 1024 * 20, timeout: 45000 },
+          { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 },
           async (err2, stdoutBuffer) => {
             if (err2) {
               console.error(
                 `[Erro FFMPEG] Falha ao extrair frame do vídeo: ${videoSorteado.nome}. Tentando outro...`,
               );
-              return processarVideo(msgProcessando, tentativas + 1);
+              return processarVideo(
+                msgProcessando,
+                cronometroCarregando,
+                tentativas + 1,
+              );
             }
 
             try {
@@ -105,7 +139,7 @@ export function execute(message) {
 
               // 6. ENVIA O DESAFIO NO CHAT
               await message.reply({
-                content: `🎮 **DESAFIO PRINTGUESS**\nDe qual categoria é essa imagem com zoom?\n\n**Categorias Disponíveis:**\n${listaCategoriasTexto}\n\n• Intensidade do Zoom: ~**${porcentagemZoom}%**\n\n✍️ *Digite o nome correto da categoria no chat para vencer!*`,
+                content: `🎮 **DESAFIO GAMER**\nQUAL O VIDEL DAI DA PRINT O NGC AI OLHA\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n\n\n`,
                 files: [
                   {
                     attachment: imagemComZoomBuffer,
@@ -114,7 +148,11 @@ export function execute(message) {
                 ],
               });
 
-              if (msgProcessando) msgProcessando.delete().catch(() => {});
+              // Limpa o intervalo e apaga a mensagem de carregamento
+              if (msgProcessando) {
+                clearInterval(cronometroCarregando);
+                msgProcessando.delete().catch(() => {});
+              }
 
               // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)
               const filtroChat = (m) => !m.author.bot;
@@ -129,17 +167,37 @@ export function execute(message) {
                 const respostaCorreta =
                   videoSorteado.categoriaNome.toLowerCase();
 
-                // VITORIAAAAAAAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // Resposta imediata se acertar
                 if (respostaUsuario === respostaCorreta) {
                   coletorChat.stop();
                   const user = await User.findById(message.author.id);
-                  user.vitorias.printGuess++;
+                  user.vitorias.numeroGuess++;
                   await user.save();
 
-                  return message.channel.send(
-                    `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> acertou em cheio!\n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Segundo exato: **${tempo}s**`,
-                  );
+                  try {
+                    // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
+                    const imagemOriginalBuffer =
+                      await sharp(stdoutBuffer).toBuffer();
+
+                    return message.channel.send({
+                      content: `🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
+                      files: [
+                        {
+                          attachment: imagemOriginalBuffer,
+                          name: "resposta_original.png",
+                        },
+                      ],
+                    });
+                  } catch (errResposta) {
+                    console.error(
+                      "[Erro Sharp] Falha ao gerar imagem de resposta:",
+                      errResposta,
+                    );
+                    // Fallback em texto caso a geração da resposta sem zoom falhe por segurança
+                    return message.channel.send(
+                      `🎉 **PA BENS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
+                    );
+                  }
                 }
 
                 // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
@@ -149,7 +207,7 @@ export function execute(message) {
                     .includes(respostaUsuario)
                 ) {
                   msgPretendente
-                    .reply("❌ Resposta incorreta! Continue tentando...")
+                    .reply("❌ ERROU BURRO DO CARALHO")
                     .then((m) => {
                       setTimeout(() => m.delete().catch(() => {}), 2500);
                     });
@@ -157,7 +215,11 @@ export function execute(message) {
               });
             } catch (errSharp) {
               console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
-              return processarVideo(msgProcessando, tentativas + 1);
+              return processarVideo(
+                msgProcessando,
+                cronometroCarregando,
+                tentativas + 1,
+              );
             }
           },
         );
@@ -165,10 +227,22 @@ export function execute(message) {
     );
   }
 
+  // Envia a mensagem inicial de carregamento
   message.channel
-    .send("🔄 Puxando o vídeo da nuvem e aplicando o efeito de zoom extremo...")
+    .send("🔄 CARGANDO .")
     .then((msgProcessando) => {
-      processarVideo(msgProcessando);
+      let pontos = 1;
+
+      // Inicia o intervalo de 1 segundo para atualizar os pontos dinamicamente
+      const cronometroCarregando = setInterval(async () => {
+        pontos++;
+        const sufixoPontos = " .".repeat(pontos);
+
+        await msgProcessando.edit(`🔄 CARGANDO${sufixoPontos}`).catch(() => {});
+      }, 1000);
+
+      // Dispara a função principal injetando a mensagem e o cronômetro dela
+      processarVideo(msgProcessando, cronometroCarregando);
     })
     .catch(console.error);
 }
