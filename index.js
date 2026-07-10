@@ -79,4 +79,8 @@ client.once("clientReady", async () => {
 });
 
 await connectDB();
+
+console.log("Token existe?", !!process.env.DISCORD_TOKEN);
+console.log("Tamanho:", process.env.DISCORD_TOKEN?.length);
+
 client.login(process.env.DISCORD_TOKEN);
