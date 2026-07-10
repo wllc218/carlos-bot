@@ -2,11 +2,7 @@ import { exec } from "child_process";
 import path from "path";
 import sharp from "sharp";
 import videos from "../../data/videos.json" with { type: "json" };
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pathUserSchema = path.resolve(process.cwd(), "server", "schemas", "user.schema.js");
-const User = require(pathUserSchema).default || require(pathUserSchema);
-
+import User from "../../server/schemas/user-schema.js";
 export const name = "printguess";
 export function execute(message) {
   // 1. MAPEIA AS CATEGORIAS E TRANSFORMA EM UMA LISTA ÚNICA DE VÍDEOS
@@ -174,13 +170,10 @@ export function execute(message) {
                 // Resposta imediata se acertar
                 if (respostaUsuario === respostaCorreta) {
                   coletorChat.stop();
-                  
+                  const user = await User.findById(message.author.id);
+                  user.vitorias.printGuess++;
+                  await user.save();
                   // Busca e atribui os pontos para quem acertou o desafio
-                  const user = await User.findById(msgPretendente.author.id);
-                  if (user && user.vitorias) {
-                    user.vitorias.numeroGuess++;
-                    await user.save();
-                  }
 
                   try {
                     // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
