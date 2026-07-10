@@ -44,7 +44,7 @@ export function execute(message) {
     const linkVideo = videoSorteado.url;
 
     // 2. BUSCA AS DIMENSÕES, DURAÇÃO REAL E TAXA DE FRAMES (FPS) DO VÍDEO
-    exec(`ffprobe -v error -nobuffer -analyzeduration 0 -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 10000 }, (err, stdout) => {
+    exec(`ffprobe -v error -nobuffer -analyzeduration 0 -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 100000 }, (err, stdout) => {
         if (err) {
           console.error(
             `[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro...`,
