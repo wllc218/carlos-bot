@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import path from "path";
 import sharp from "sharp";
 import videos from "../../data/videos.json" with { type: "json" };
+import User from "../../server/User.js";
 
 export const name = "printguess";
 export function execute(message) {
@@ -170,9 +171,13 @@ export function execute(message) {
                 // Resposta imediata se acertar
                 if (respostaUsuario === respostaCorreta) {
                   coletorChat.stop();
-                  const user = await User.findById(message.author.id);
-                  user.vitorias.numeroGuess++;
-                  await user.save();
+                  
+                  // CORREÇÃO AQUI: Busca e dá os pontos para a pessoa que acertou (msgPretendente), não para quem ativou o bot
+                  const user = await User.findById(msgPretendente.author.id);
+                  if (user && user.vitorias) {
+                    user.vitorias.numeroGuess++;
+                    await user.save();
+                  }
 
                   try {
                     // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
