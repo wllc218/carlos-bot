@@ -19,7 +19,12 @@ dotenv.config();
 //faz o prefixo funcionar
 const prefix = "C!";
 
-console.log(process.version);
+console.log(JSON.stringify(process.env.DISCORD_TOKEN));
+console.log(process.env.DISCORD_TOKEN.length);
+
+for (const c of process.env.DISCORD_TOKEN) {
+  console.log(c.charCodeAt(0));
+}
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -80,10 +85,14 @@ client.once("clientReady", async () => {
   messageCount(client);
 });
 
-await connectDB();
-
 console.log("Token existe?", !!process.env.DISCORD_TOKEN);
 console.log("Tamanho:", process.env.DISCORD_TOKEN?.length);
+
+const token = process.env.DISCORD_TOKEN.trim();
+
+console.log(token === process.env.DISCORD_TOKEN);
+
+await client.login(token);
 
 try {
   await connectDB();
