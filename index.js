@@ -13,6 +13,11 @@ import messageCount from "./comandos/message-counter/message-counter.js";
 //prettier-ignore
 const client = new Client({intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 import dotenv from "dotenv";
+import { exec } from "child_process";
+
+exec("which ffmpeg", (err, stdout) => {
+  console.log("FFmpeg:", stdout || "NÃO ENCONTRADO");
+});
 
 dotenv.config();
 
