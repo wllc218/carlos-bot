@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import path from "path";
 import sharp from "sharp";
 import videos from "../../data/videos.json" with { type: "json" };
-import User from "../../server/User.js";
+import User from "../../server/schemas/user.schema.js";
 
 export const name = "printguess";
 export function execute(message) {
@@ -172,7 +172,7 @@ export function execute(message) {
                 if (respostaUsuario === respostaCorreta) {
                   coletorChat.stop();
                   
-                  // CORREÇÃO AQUI: Busca e dá os pontos para a pessoa que acertou (msgPretendente), não para quem ativou o bot
+                  // Busca e atribui os pontos para quem acertou o desafio
                   const user = await User.findById(msgPretendente.author.id);
                   if (user && user.vitorias) {
                     user.vitorias.numeroGuess++;
