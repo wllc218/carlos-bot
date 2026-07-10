@@ -2,121 +2,175 @@
   "BBnicolas": [
     {
       "nome": "sonic.exe",
-      "url": "https://files.catbox.moe/8ec90a.mp4"
+      "url": "https://files.catbox.moe/8ec90a.mp4",
+      "fps": 30,
+      "duracao": 64.20
     },
     {
       "nome": "tiktok",
-      "url": "https://files.catbox.moe/s7f8wh.mp4"
+      "url": "https://files.catbox.moe/s7f8wh.mp4",
+      "fps": 30,
+      "duracao": 89.67
     },
     {
       "nome": "casa",
-      "url": "https://files.catbox.moe/tzh6al.mp4"
+      "url": "https://files.catbox.moe/tzh6al.mp4",
+      "fps": 30,
+      "duracao": 132.77
     },
     {
       "nome": "ultrakill",
-      "url": "https://files.catbox.moe/iujdog.mp4"
+      "url": "https://files.catbox.moe/iujdog.mp4",
+      "fps": 30,
+      "duracao": 167.02
     }
   ],
   "Carlostale": [
     {
       "nome": "brinquedo",
-      "url": "https://files.catbox.moe/ou99n1.mp4"
+      "url": "https://files.catbox.moe/ou99n1.mp4",
+      "fps": 30,
+      "duracao": 10.82
     },
     {
       "nome": "carlos",
-      "url": "https://files.catbox.moe/pj15mm.mp4"
+      "url": "https://files.catbox.moe/pj15mm.mp4",
+      "fps": 30,
+      "duracao": 28.51
     },
     {
       "nome": "fabrica",
-      "url": "https://files.catbox.moe/5p4m6d.mp4"
+      "url": "https://files.catbox.moe/5p4m6d.mp4",
+      "fps": 30,
+      "duracao": 13.28
     },
     {
       "nome": "gamer",
-      "url": "https://files.catbox.moe/onjcr7.mp4"
+      "url": "https://files.catbox.moe/onjcr7.mp4",
+      "fps": 30,
+      "duracao": 14.00
     },
     {
       "nome": "madness",
-      "url": "https://files.catbox.moe/j4kdwt.mp4"
+      "url": "https://files.catbox.moe/j4kdwt.mp4",
+      "fps": 30,
+      "duracao": 13.07
     },
     {
       "nome": "palco",
-      "url": "https://files.catbox.moe/3n9m8x.mp4"
+      "url": "https://files.catbox.moe/3n9m8x.mp4",
+      "fps": 30,
+      "duracao": 10.45
     },
     {
       "nome": "privada",
-      "url": "https://files.catbox.moe/iusern.mp4"
+      "url": "https://files.catbox.moe/iusern.mp4",
+      "fps": 30,
+      "duracao": 11.61
     }
   ],
   "Deltalucas": [
     {
       "nome": "casa-lucas",
-      "url": "https://files.catbox.moe/grtn1m.mp4"
+      "url": "https://files.catbox.moe/grtn1m.mp4",
+      "fps": 30,
+      "duracao": 121.49
     },
     {
       "nome": "dark-world",
-      "url": "https://files.catbox.moe/6p1t7t.mp4"
+      "url": "https://files.catbox.moe/6p1t7t.mp4",
+      "fps": 30,
+      "duracao": 98.34
     },
     {
       "nome": "felps",
-      "url": "https://files.catbox.moe/m0g2pz.mp4"
+      "url": "https://files.catbox.moe/m0g2pz.mp4",
+      "fps": 30,
+      "duracao": 89.49
     },
     {
       "nome": "floresta",
-      "url": "https://files.catbox.moe/kt63ci.mp4"
+      "url": "https://files.catbox.moe/kt63ci.mp4",
+      "fps": 30,
+      "duracao": 143.52
     },
     {
       "nome": "garrafao",
-      "url": "https://files.catbox.moe/vblp3b.mp4"
+      "url": "https://files.catbox.moe/vblp3b.mp4",
+      "fps": 30,
+      "duracao": 108.90
     }
   ],
   "Enem quest": [
     {
       "nome": "rio-de-janeiro",
-      "url": "https://files.catbox.moe/gydv3z.mp4"
+      "url": "https://files.catbox.moe/gydv3z.mp4",
+      "fps": 30,
+      "duracao": 93.50
     },
     {
       "nome": "intro",
-      "url": "https://files.catbox.moe/e3alhq.mp4"
+      "url": "https://files.catbox.moe/e3alhq.mp4",
+      "fps": 30,
+      "duracao": 69.57
     },
     {
       "nome": "ceara",
-      "url": "https://files.catbox.moe/qvb20g.mp4"
+      "url": "https://files.catbox.moe/qvb20g.mp4",
+      "fps": 30,
+      "duracao": 229.95
     },
     {
       "nome": "sao-paulo",
-      "url": "https://files.catbox.moe/nq9b5o.mp4"
+      "url": "https://files.catbox.moe/nq9b5o.mp4",
+      "fps": 30,
+      "duracao": 234.01
     }
   ],
   "Enem quest 2": [
     {
       "nome": "ceara",
-      "url": "https://files.catbox.moe/8t7ctq.mp4"
+      "url": "https://files.catbox.moe/8t7ctq.mp4",
+      "fps": 30,
+      "duracao": 124.10
     },
     {
       "nome": "enem",
-      "url": "https://files.catbox.moe/amyqlx.mp4"
+      "url": "https://files.catbox.moe/amyqlx.mp4",
+      "fps": 30,
+      "duracao": 107.88
     },
     {
       "nome": "nabbit",
-      "url": "https://files.catbox.moe/lloesn.mp4"
+      "url": "https://files.catbox.moe/lloesn.mp4",
+      "fps": 30,
+      "duracao": 97.71
     },
     {
       "nome": "sao-paulo",
-      "url": "https://files.catbox.moe/f4614r.mp4"
+      "url": "https://files.catbox.moe/f4614r.mp4",
+      "fps": 30,
+      "duracao": 94.58
     },
     {
       "nome": "rio-de-janeiro",
-      "url": "https://files.catbox.moe/guegz9.mp4"
+      "url": "https://files.catbox.moe/guegz9.mp4",
+      "fps": 30,
+      "duracao": 113.64
     }
   ],
   "Wallace": [
     {
       "nome": "wallace-1",
-      "url": "https://files.catbox.moe/a1g7rl.mp4"
+      "url": "https://files.catbox.moe/a1g7rl.mp4",
+      "fps": 30,
+      "duracao": 191.45
     },
     {
       "nome": "wallace-2",
-      "url": "https://files.catbox.moe/7z80be.mp4"
+      "url": "https://files.catbox.moe/7z80be.mp4",
+      "fps": 30,
+      "duracao": 210.57
     }
   ]
 }
