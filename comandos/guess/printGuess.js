@@ -24,7 +24,7 @@ export function execute(message) {
     return message.reply("❌ Nenhum vídeo configurado no arquivo videos.json!");
   }
 
-  // Função interna para processamento - Recebe corretamente o cronômetro como segundo parâmetro
+  // Função interna para processamento - Agora roda de forma instantânea
   function processarVideo(
     msgProcessando,
     cronometroCarregando,
@@ -36,7 +36,7 @@ export function execute(message) {
         msgProcessando.delete().catch(() => {});
       }
       return message.reply(
-        "❌ Ocorreram erros seguidos ao tentar ler os vídeos na nuvem.",
+        "❌ Ocorreram erros seguidos ao tentar processar os frames dos vídeos.",
       );
     }
 
@@ -44,14 +44,40 @@ export function execute(message) {
       todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
     const linkVideo = videoSorteado.url;
 
-    // 2. BUSCA AS DIMENSÕES, DURAÇÃO REAL E TAXA DE FRAMES (FPS) DO VÍDEO
-    // CORREÇÃO: Removidas as flags de buffer que quebravam a leitura da nuvem e adicionado stderr
-    exec(`ffprobe -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate:format=duration -of default=noprint_wrappers=1:nokey=1 "${linkVideo}"`, { timeout: 12000 }, (err, stdout, stderr) => {
-        if (err) {
+    // 2. PEGA OS DADOS DIRETO DO JSON (Sem precisar rodar FFprobe na rede!)[cite: 1]
+    const larguraOriginal = videoSorteado.largura || 1920; 
+    const alturaOriginal = videoSorteado.altura || 1080;   
+    const fps = parseFloat(videoSorteado.fps);
+    const duracao = parseFloat(videoSorteado.duracao);
+
+    // Validação de segurança caso você esqueça de preencher algum no JSON[cite: 1]
+    if (isNaN(fps) || isNaN(duracao)) {
+      console.error(`[Aviso] O vídeo ${videoSorteado.nome} não possui 'fps' ou 'duracao' configurados no JSON.`);
+      return processarVideo(
+        msgProcessando,
+        cronometroCarregando,
+        tentativas + 1,
+      );
+    }
+
+    // Calcula o total de frames aproximados do vídeo e sorteia um frame específico
+    const totalDeFrames = Math.floor(duracao * fps);
+    const frameSorteado = Math.floor(Math.random() * totalDeFrames);
+
+    // Transforma o frame sorteado em segundos exatos para busca veloz via Fast Seeking (-ss)
+    const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
+
+    // FORMATO ATUALIZADO: 'mjpeg' para compatibilidade total com buffers no Windows
+    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
+
+    // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM[cite: 1]
+    exec(
+      ffmpegComando,
+      { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 },
+      async (err2, stdoutBuffer) => {
+        if (err2) {
           console.error(
-            `[Erro FFprobe] Falha ao ler o vídeo: ${videoSorteado.nome}. Tentando outro... | Detalhes:`,
-            err.message,
-            stderr ? stderr.toString() : ""
+            `[Erro FFMPEG] Falha ao extrair frame do vídeo: ${videoSorteado.nome}. Tentando outro...`,
           );
           return processarVideo(
             msgProcessando,
@@ -60,176 +86,125 @@ export function execute(message) {
           );
         }
 
-        const dados = stdout.trim().split("\n");
-        const larguraOriginal = parseInt(dados[0]);
-        const alturaOriginal = parseInt(dados[1]);
+        try {
+          // 4. CÁLCULO DO ZOOM ALEATÓRIO (De 2/4 até zoom quase total de 4/4)
+          const fatorZoom = 0.1 + Math.random() * 0.4;
 
-        // Tratamento da taxa de frames (r_frame_rate vem em formato de fração, ex: "30/1" ou "60000/1001")
-        const expressaoFps = dados[2].split("/");
-        const fps = parseFloat(expressaoFps[0]) / parseFloat(expressaoFps[1]);
-        const duracao = parseFloat(dados[3]);
+          const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
+          const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
 
-        if (
-          isNaN(larguraOriginal) ||
-          isNaN(alturaOriginal) ||
-          isNaN(fps) ||
-          isNaN(duracao)
-        ) {
-          return processarVideo(
-            msgProcessando,
-            cronometroCarregando,
-            tentativas + 1,
+          const xAleatorio = Math.floor(
+            Math.random() * (larguraOriginal - larguraCorte),
           );
-        }
+          const yAleatorio = Math.floor(
+            Math.random() * (alturaOriginal - alturaCorte),
+          );
 
-        // Calcula o total de frames aproximados do vídeo e sorteia um frame específico
-        const totalDeFrames = Math.floor(duracao * fps);
-        const frameSorteado = Math.floor(Math.random() * totalDeFrames);
+          // 5. SHARP APLICA O RECORTE E ESTICA A IMAGEM NA RAM[cite: 1]
+          const imagemComZoomBuffer = await sharp(stdoutBuffer)
+            .extract({
+              left: xAleatorio,
+              top: yAleatorio,
+              width: larguraCorte,
+              height: alturaCorte,
+            })
+            .resize(larguraOriginal, alturaOriginal)
+            .toBuffer();
 
-        // Transforma o frame sorteado em segundos exatos para busca veloz via Fast Seeking (-ss)
-        const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
+          const listaCategoriasTexto = ReduzirCategorias(categoriasDisponiveis);
 
-        // FORMATO ATUALIZADO: 'mjpeg' para compatibilidade total com buffers no Windows
-        const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
+          // 6. ENVIA O DESAFIO NO CHAT[cite: 1]
+          await message.reply({
+            content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
+            files: [
+              {
+                attachment: imagemComZoomBuffer,
+                name: "desafio_zoom.png",
+              },
+            ],
+          });
 
-        // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
-        exec(
-          ffmpegComando,
-          { encoding: "buffer", maxBuffer: 1024 * 1024 * 30, timeout: 9000 },
-          async (err2, stdoutBuffer) => {
-            if (err2) {
-              console.error(
-                `[Erro FFMPEG] Falha ao extrair frame do vídeo: ${videoSorteado.nome}. Tentando outro...`,
-              );
-              return processarVideo(
-                msgProcessando,
-                cronometroCarregando,
-                tentativas + 1,
-              );
-            }
+          // Limpa o intervalo e apaga a mensagem de carregamento
+          if (msgProcessando) {
+            clearInterval(cronometroCarregando);
+            msgProcessando.delete().catch(() => {});
+          }
 
-            try {
-              // 4. CÁLCULO DO ZOOM ALEATÓRIO (De 2/4 até zoom quase total de 4/4)
-              const fatorZoom = 0.1 + Math.random() * 0.4;
+          // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)[cite: 1]
+          const filtroChat = (m) => !m.author.bot;
+          const coletorChat = message.channel.createMessageCollector({
+            filter: filtroChat,
+          });
 
-              const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
-              const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
+          coletorChat.on("collect", async (msgPretendente) => {
+            const respostaUsuario = msgPretendente.content
+              .trim()
+              .toLowerCase();
+            const respostaCorreta =
+              videoSorteado.categoriaNome.toLowerCase();
 
-              const xAleatorio = Math.floor(
-                Math.random() * (larguraOriginal - larguraCorte),
-              );
-              const yAleatorio = Math.floor(
-                Math.random() * (alturaOriginal - alturaCorte),
-              );
-
-              // 5. SHARP APLICA O RECORTE E ESTICA A IMAGEM NA RAM
-              const imagemComZoomBuffer = await sharp(stdoutBuffer)
-                .extract({
-                  left: xAleatorio,
-                  top: yAleatorio,
-                  width: larguraCorte,
-                  height: alturaCorte,
-                })
-                .resize(larguraOriginal, alturaOriginal)
-                .toBuffer();
-
-              const porcentagemZoom = Math.round((1 - fatorZoom) * 100);
-              const listaCategoriasTexto = ReduzirCategorias(categoriasDisponiveis);
-
-              // 6. ENVIA O DESAFIO NO CHAT
-              await message.reply({
-                content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
-                files: [
-                  {
-                    attachment: imagemComZoomBuffer,
-                    name: "desafio_zoom.png",
-                  },
-                ],
-              });
-
-              // Limpa o intervalo e apaga a mensagem de carregamento
-              if (msgProcessando) {
-                clearInterval(cronometroCarregando);
-                msgProcessando.delete().catch(() => {});
+            // Resposta imediata se acertar[cite: 1]
+            if (respostaUsuario === respostaCorreta) {
+              coletorChat.stop();
+              
+              // Pontuação para quem acertou salvando na propriedade correta[cite: 1]
+              const user = await User.findById(msgPretendente.author.id);
+              if (user && user.vitorias) {
+                user.vitorias.printGuess++;
+                await user.save();
               }
 
-              // 7. COLETOR DE MENSAGENS INDEFINIDO (Roda até alguém acertar)
-              const filtroChat = (m) => !m.author.bot;
-              const coletorChat = message.channel.createMessageCollector({
-                filter: filtroChat,
-              });
+              try {
+                // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM[cite: 1]
+                const imagemOriginalBuffer =
+                  await sharp(stdoutBuffer).toBuffer();
 
-              coletorChat.on("collect", async (msgPretendente) => {
-                const respostaUsuario = msgPretendente.content
-                  .trim()
-                  .toLowerCase();
-                const respostaCorreta =
-                  videoSorteado.categoriaNome.toLowerCase();
-
-                // Resposta imediata se acertar
-                if (respostaUsuario === respostaCorreta) {
-                  coletorChat.stop();
-                  
-                  // CORREÇÃO: Pontuação vai para quem acertou (msgPretendente) usando a propriedade correta
-                  const user = await User.findById(msgPretendente.author.id);
-                  if (user && user.vitorias) {
-                    user.vitorias.printGuess++;
-                    await user.save();
-                  }
-
-                  try {
-                    // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
-                    const imagemOriginalBuffer =
-                      await sharp(stdoutBuffer).toBuffer();
-
-                    return message.channel.send({
-                      content: `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
-                      files: [
-                        {
-                          attachment: imagemOriginalBuffer,
-                          name: "resposta_original.png",
-                        },
-                      ],
-                    });
-                  } catch (errResposta) {
-                    console.error(
-                      "[Erro Sharp] Falha ao gerar imagem de resposta:",
-                      errResposta,
-                    );
-                    return message.channel.send(
-                      `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
-                    );
-                  }
-                }
-
-                // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)
-                if (
-                  categoriasDisponiveis
-                    .map((c) => c.toLowerCase())
-                    .includes(respostaUsuario)
-                ) {
-                  msgPretendente
-                    .reply("❌ ERROU!")
-                    .then((m) => {
-                      setTimeout(() => m.delete().catch(() => {}), 2500);
-                    });
-                }
-              });
-            } catch (errSharp) {
-              console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
-              return processarVideo(
-                msgProcessando,
-                cronometroCarregando,
-                tentativas + 1,
-              );
+                return message.channel.send({
+                  content: `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
+                  files: [
+                    {
+                      attachment: imagemOriginalBuffer,
+                      name: "resposta_original.png",
+                    },
+                  ],
+                });
+              } catch (errResposta) {
+                console.error(
+                  "[Erro Sharp] Falha ao gerar imagem de resposta:",
+                  errResposta,
+                );
+                return message.channel.send(
+                  `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
+                );
+              }
             }
-          },
-        );
+
+            // Resposta imediata se errar (apenas se o chute for uma das categorias válidas do jogo)[cite: 1]
+            if (
+              categoriasDisponiveis
+                .map((c) => c.toLowerCase())
+                .includes(respostaUsuario)
+            ) {
+              msgPretendente
+                .reply("❌ ERROU!")
+                .then((m) => {
+                  setTimeout(() => m.delete().catch(() => {}), 2500);
+                });
+            }
+          });
+        } catch (errSharp) {
+          console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
+          return processarVideo(
+            msgProcessando,
+            cronometroCarregando,
+            tentativas + 1,
+          );
+        }
       },
     );
   }
 
-  // Envia a mensagem inicial de carregamento
+  // Envia a mensagem inicial de carregamento[cite: 1]
   message.channel
     .send("🔄 CARGANDO .")
     .then((msgProcessando) => {
