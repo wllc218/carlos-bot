@@ -101,8 +101,9 @@ export function execute(message) {
           // 4. CÁLCULO DO ZOOM ALEATÓRIO
           const fatorZoom = 0.1 + Math.random() * 0.4;
 
-          const larguraCorte = Math.floor(larguraOriginal * factorZoom);
-          const alturaCorte = Math.floor(alturaOriginal * factorZoom);
+          // CORRIGIDO: Agora usa fatorZoom (em português) corretamente
+          const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
+          const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
 
           const xAleatorio = Math.floor(
             Math.random() * (larguraOriginal - larguraCorte),
