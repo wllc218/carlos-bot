@@ -67,22 +67,21 @@ export function execute(message) {
     // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // Formato mjpeg para extrair direto para a memória
-    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
+    // OTIMIZAÇÃO EXTREMA: Busca o frame antes de abrir o arquivo (-ss antes de -i)
+    // -nobuffer e -fflags nobuffer impedem que ele gaste tempo acumulando dados de rede
+    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -nobuffer -fflags nobuffer -probesize 32 -analyzeduration 0 -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
 
-    // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
+    // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM (Timeout baixo e seguro)
     exec(
       ffmpegComando,
       {
         encoding: "buffer",
-        maxBuffer: 1024 * 1024 * 30,
-        timeout: 9000,
+        maxBuffer: 1024 * 1024 * 30, // 30MB
+        timeout: 9000, // Tempo baixo: se a rede engasgar, ele pula rápido para o próximo
       },
-      async (err2, stdoutBuffer, stderrBuffer) => {
-        if (err2) {
-          console.error(err2);
-          console.error(stderrBuffer.toString());
-
+      async (err2, stdoutBuffer) => {
+        // Se o buffer vier vazio ou der erro de rede, joga para a próxima tentativa instantaneamente
+        if (err2 || !stdoutBuffer || stdoutBuffer.length === 0) {
           return processarVideo(
             msgProcessando,
             cronometroCarregando,
@@ -91,7 +90,7 @@ export function execute(message) {
         }
 
         try {
-          // CORREÇÃO: Lê as dimensões reais da imagem direto do buffer extraído!
+          // Lendo as dimensões reais direto da RAM
           const metadata = await sharp(stdoutBuffer).metadata();
           const larguraOriginal = metadata.width;
           const alturaOriginal = metadata.height;
@@ -100,7 +99,7 @@ export function execute(message) {
             throw new Error("Não foi possível ler as dimensões da imagem.");
           }
 
-          // 4. CÁLCULO DO ZOOM ALEATÓRIO (Garante que nunca saia das dimensões reais)
+          // 4. CÁLCULO DO ZOOM ALEATÓRIO
           const fatorZoom = 0.1 + Math.random() * 0.4;
 
           const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
@@ -165,7 +164,6 @@ export function execute(message) {
               }
 
               try {
-                // Gera a imagem original (sem zoom) aproveitando o buffer que já está na RAM
                 const imagemOriginalBuffer =
                   await sharp(stdoutBuffer).toBuffer();
 
