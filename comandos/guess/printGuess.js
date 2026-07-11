@@ -67,21 +67,20 @@ export function execute(message) {
     // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // OTIMIZAÇÃO EXTREMA: Busca o frame antes de abrir o arquivo (-ss antes de -i)
-    // -nobuffer e -fflags nobuffer impedem que ele gaste tempo acumulando dados de rede
-    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -nobuffer -fflags nobuffer -probesize 32 -analyzeduration 0 -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
+    // CORREÇÃO EQUILIBRADA: Busca remota instantânea (-ss antes do -i) + margem leve de rede para não quebrar
+    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -probesize 150K -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
 
-    // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM (Timeout baixo e seguro)
+    // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
     exec(
       ffmpegComando,
       {
         encoding: "buffer",
         maxBuffer: 1024 * 1024 * 30, // 30MB
-        timeout: 9000, // Tempo baixo: se a rede engasgar, ele pula rápido para o próximo
+        timeout: 9000, // Se a stream engasgar por 9s, pula para outra tentativa
       },
       async (err2, stdoutBuffer) => {
-        // Se o buffer vier vazio ou der erro de rede, joga para a próxima tentativa instantaneamente
         if (err2 || !stdoutBuffer || stdoutBuffer.length === 0) {
+          console.error(`[Aviso] Falha na tentativa ${tentativas + 1} com o vídeo: ${videoSorteado.nome}. Tentando outro...`);
           return processarVideo(
             msgProcessando,
             cronometroCarregando,
@@ -90,7 +89,7 @@ export function execute(message) {
         }
 
         try {
-          // Lendo as dimensões reais direto da RAM
+          // Lendo as dimensões reais direto da RAM via Sharp
           const metadata = await sharp(stdoutBuffer).metadata();
           const larguraOriginal = metadata.width;
           const alturaOriginal = metadata.height;
@@ -102,8 +101,8 @@ export function execute(message) {
           // 4. CÁLCULO DO ZOOM ALEATÓRIO
           const fatorZoom = 0.1 + Math.random() * 0.4;
 
-          const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
-          const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
+          const larguraCorte = Math.floor(larguraOriginal * factorZoom);
+          const alturaCorte = Math.floor(alturaOriginal * factorZoom);
 
           const xAleatorio = Math.floor(
             Math.random() * (larguraOriginal - larguraCorte),
