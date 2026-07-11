@@ -67,20 +67,29 @@ export function execute(message) {
     // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // CORREÇÃO EQUILIBRADA: Busca remota instantânea (-ss antes do -i) + margem leve de rede para não quebrar
-    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -probesize 150K -i "${linkVideo}" -frames:v 1 -an -f image2pipe -vcodec mjpeg -`;
+    // ADICIONADO: "-discard nokey" e "-vframes 1" para estabilizar frames corrompidos via rede
+    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -probesize 150K -i "${linkVideo}" -vframes 1 -an -f image2pipe -vcodec mjpeg -`;
 
     // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
     exec(
       ffmpegComando,
       {
         encoding: "buffer",
-        maxBuffer: 1024 * 1024 * 30, // 30MB
-        timeout: 9000, // Se a stream engasgar por 9s, pula para outra tentativa
+        maxBuffer: 1024 * 1024 * 60, // Aumentado para 60MB para prevenir estouro de buffer do Node
+        timeout: 12000, // Subiu para 12s para absorver lentidões de handshake da nuvem
       },
-      async (err2, stdoutBuffer) => {
+      async (err2, stdoutBuffer, stderrBuffer) => {
+        // ANÁLISE COMPLETA NO TERMINAL: Se falhar, vai cuspir o motivo real agora
         if (err2 || !stdoutBuffer || stdoutBuffer.length === 0) {
-          console.error(`[Aviso] Falha na tentativa ${tentativas + 1} com o vídeo: ${videoSorteado.nome}. Tentando outro...`);
+          console.error(`\n============ [ERRO IMPREVISTO NO FFmpeg] ============`);
+          console.error(`Vídeo atual: ${videoSorteado.nome} (${linkVideo})`);
+          console.error(`Tentativa: ${tentativas + 1}/3`);
+          if (err2) console.error(`Detalhes do Erro do Node:`, err2.message);
+          if (stderrBuffer && stderrBuffer.length > 0) {
+            console.error(`Log do FFmpeg:\n${stderrBuffer.toString("utf8")}`);
+          }
+          console.error(`======================================================\n`);
+
           return processarVideo(
             msgProcessando,
             cronometroCarregando,
@@ -101,7 +110,6 @@ export function execute(message) {
           // 4. CÁLCULO DO ZOOM ALEATÓRIO
           const fatorZoom = 0.1 + Math.random() * 0.4;
 
-          // CORRIGIDO: Agora usa fatorZoom (em português) corretamente
           const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
           const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
 
