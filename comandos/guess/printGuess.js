@@ -97,15 +97,16 @@ export function execute(message) {
         }
 
         try {
-          // ANALISA SE O FRAME É PRETO/ESCURO ANTES DE CONTINUAR
+          // ANALISA SE O FRAME É VÁLIDO (NÃO PRETO E NÃO BRANCO)
           const stats = await sharp(stdoutBuffer).stats();
           const mediaBrilho = (stats.channels[0].mean + stats.channels[1].mean + stats.channels[2].mean) / 3;
 
-          // CORRIGIDO: Agora avisa "FRAME PRETO" no chat e deleta o aviso depois de 3 segundos
-          if (mediaBrilho < 25) {
-            console.warn(`[Filtro Anti-Breu] Frame escuro detectado no vídeo "${videoSorteado.nome}".`);
+          // CORREÇÃO: Bloqueia menor que 25 (Preto) OU maior que 230 (Branco)
+          if (mediaBrilho < 25 || mediaBrilho > 230) {
+            const tipoFrame = mediaBrilho < 25 ? "PRETO" : "BRANCO";
+            console.warn(`[Filtro de Qualidade] Frame ${tipoFrame} detectado no vídeo "${videoSorteado.nome}" (Brilho: ${mediaBrilho.toFixed(2)}).`);
             
-            message.channel.send("⚠️ **FRAME PRETO** (Sorteando outro frame...)").then((m) => {
+            message.channel.send(`⚠️ **FRAME ${tipoFrame}**`).then((m) => {
               setTimeout(() => m.delete().catch(() => {}), 3000);
             });
 
