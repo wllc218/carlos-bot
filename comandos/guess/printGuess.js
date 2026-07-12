@@ -101,12 +101,11 @@ export function execute(message) {
           const stats = await sharp(stdoutBuffer).stats();
           const mediaBrilho = (stats.channels[0].mean + stats.channels[1].mean + stats.channels[2].mean) / 3;
 
-          // CORREÇÃO: Bloqueia menor que 25 (Preto) OU maior que 230 (Branco)
           if (mediaBrilho < 25 || mediaBrilho > 230) {
             const tipoFrame = mediaBrilho < 25 ? "PRETO" : "BRANCO";
             console.warn(`[Filtro de Qualidade] Frame ${tipoFrame} detectado no vídeo "${videoSorteado.nome}" (Brilho: ${mediaBrilho.toFixed(2)}).`);
             
-            message.channel.send(`⚠️ **FRAME ${tipoFrame}**`).then((m) => {
+            message.channel.send(`⚠️ **FRAME ${tipoFrame}** (Sorteando outro frame...)`).then((m) => {
               setTimeout(() => m.delete().catch(() => {}), 3000);
             });
 
@@ -139,22 +138,39 @@ export function execute(message) {
             Math.random() * (alturaOriginal - alturaCorte),
           );
 
-          // 5. SHARP APLICA O RECORTE E ESTICA A IMAGEM NA RAM
-          const imagemComZoomBuffer = await sharp(stdoutBuffer)
+          // 5. SISTEMA DE MODIFICAÇÕES ALEATÓRIAS (FILTROS)
+          const listaModificacoes = [
+            { nome: "Nenhum (Padrão)", aplicar: (img) => img },
+            { nome: "🔄 Invertido Horizontalmente", aplicar: (img) => img.flop() },
+            { nome: "🔀 Invertido Verticalmente", aplicar: (img) => img.flip() },
+            { nome: "⚫ Preto e Branco", aplicar: (img) => img.grayscale() },
+            { nome: "🧪 Cores Negativas (Invertidas)", aplicar: (img) => img.negate() },
+            { nome: "💧 Levemente Borrado (Blur)", aplicar: (img) => img.blur(3) },
+            { nome: "🎨 Pintura a Óleo (Filtro Mediana)", aplicar: (img) => img.median(3) }
+          ];
+
+          // Sorteia uma modificação da lista
+          const modificacaoEscolhida = listaModificacoes[Math.floor(Math.random() * listaModificacoes.length)];
+
+          // Inicia a instância do Sharp com o recorte e o redimensionamento padrão
+          let pipelineSharp = sharp(stdoutBuffer)
             .extract({
               left: xAleatorio,
               top: yAleatorio,
               width: larguraCorte,
               height: alturaCorte,
             })
-            .resize(larguraOriginal, alturaOriginal)
-            .toBuffer();
+            .resize(larguraOriginal, alturaOriginal);
 
+          // Aplica dinamicamente a modificação sorteada no pipeline
+          pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp);
+
+          const imagemComZoomBuffer = await pipelineSharp.toBuffer();
           const listaCategoriasTexto = ReduzirCategorias(categoriasDisponiveis);
 
-          // 6. ENVIA O DESAFIO NO CHAT
+          // 6. ENVIA O DESAFIO NO CHAT INCLUINDO O NOME DA MODIFICAÇÃO
           await message.reply({
-            content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
+            content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n✨ **Modificação desta rodada:** ${modificacaoEscolhida.nome}\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
             files: [
               {
                 attachment: imagemComZoomBuffer,
@@ -191,6 +207,7 @@ export function execute(message) {
               }
 
               try {
+                // A resposta correta sempre envia a imagem original sem filtros para comparação
                 const imagemOriginalBuffer =
                   await sharp(stdoutBuffer).toBuffer();
 
@@ -226,7 +243,7 @@ export function execute(message) {
             }
           });
         } catch (errSharp) {
-          console.error("[Erro Sharp] Falha ao aplicar zoom:", errSharp);
+          console.error("[Erro Sharp] Falha ao aplicar filtros/zoom:", errSharp);
           return processarVideo(
             msgProcessando,
             cronometroCarregando,
