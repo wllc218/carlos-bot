@@ -5,20 +5,18 @@ export const name = "ranking";
 export async function execute(message) {
   let mensagem = [];
   const usuarios = await User.find();
-
+  const total = (a, b) => a + b;
   const ranking = usuarios.sort((a, b) => {
-    const totalA =
-      a.vitorias.numeroGuess + a.vitorias.printGuess + a.vitorias.dialoGuess;
-
-    const totalB =
-      b.vitorias.numeroGuess + b.vitorias.printGuess + b.vitorias.dialoGuess;
-
+    const totalA = Object.values(a.vitorias).reduce(total);
+    const totalB = Object.values(b.vitorias).reduce(total);
     return totalB - totalA;
   });
 
+  let soma = 0;
   ranking.forEach((rank) => {
+    soma += 1;
     mensagem.push(
-      `:regional_indicator_d: ${rank.vitorias.dialoGuess} :regional_indicator_p: ${rank.vitorias.printGuess} :regional_indicator_v: ${rank.vitorias.numeroGuess} <@${rank._id}>: `,
+      `${soma == 1 ? ":first_place:" : soma == 2 ? ":second_place:" : soma == 3 ? ":third_place:" : ":middle_finger:"} ${soma}°  <@${rank._id}>: (d **${rank.vitorias.dialoGuess}** p **${rank.vitorias.printGuess}** v **${rank.vitorias.numeroGuess}**)  **[${Object.values(rank.vitorias).reduce(total)}]**`,
     );
   });
 
