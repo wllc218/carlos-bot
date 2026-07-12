@@ -44,7 +44,7 @@ export function execute(message) {
       todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
     const linkVideo = videoSorteado.url;
 
-    // Pega dados do JSON
+    // Pega dados do JSON (Aproveitando os metadados fixos para acelerar)
     const fps = parseFloat(videoSorteado.fps);
     const duracao = parseFloat(videoSorteado.duracao);
 
@@ -67,19 +67,21 @@ export function execute(message) {
     // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // ADICIONADO: "-discard nokey" e "-vframes 1" para estabilizar frames corrompidos via rede
-    const ffmpegComando = `ffmpeg -y -ss ${tempoEmSegundos} -probesize 150K -i "${linkVideo}" -vframes 1 -an -f image2pipe -vcodec mjpeg -`;
+    // OTIMIZAÇÃO MÁXIMA DE VELOCIDADE:
+    // -threads 1 evita overhead de CPU para um único frame
+    // -skip_frame nokey pula a decodificação de frames desnecessários na rede
+    // -fflags +discardcorrupt ignora pacotes ruins sem travar o download
+    const ffmpegComando = `ffmpeg -y -threads 1 -skip_frame nokey -ss ${tempoEmSegundos} -probesize 150K -fflags +discardcorrupt -i "${linkVideo}" -vframes 1 -an -f image2pipe -vcodec mjpeg -`;
 
     // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
     exec(
       ffmpegComando,
       {
         encoding: "buffer",
-        maxBuffer: 1024 * 1024 * 60, // Aumentado para 60MB para prevenir estouro de buffer do Node
-        timeout: 12000, // Subiu para 12s para absorver lentidões de handshake da nuvem
+        maxBuffer: 1024 * 1024 * 60, // 60MB
+        timeout: 12000, 
       },
       async (err2, stdoutBuffer, stderrBuffer) => {
-        // ANÁLISE COMPLETA NO TERMINAL: Se falhar, vai cuspir o motivo real agora
         if (err2 || !stdoutBuffer || stdoutBuffer.length === 0) {
           console.error(`\n============ [ERRO IMPREVISTO NO FFmpeg] ============`);
           console.error(`Vídeo atual: ${videoSorteado.nome} (${linkVideo})`);
