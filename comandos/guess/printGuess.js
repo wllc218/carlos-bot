@@ -138,20 +138,20 @@ export function execute(message) {
             Math.random() * (alturaOriginal - alturaCorte),
           );
 
-          // 5. NOVAS MODIFICAÇÕES INTERESSANTES (SEM INVERSÕES BANAIS)
+          // 5. MODIFICAÇÕES ULTRA INTENSAS (NÍVEL HARDCORE)
           const listaModificacoes = [
             { nome: "Nenhum (Padrão)", aplicar: (img) => img },
-            { nome: "⚫ Monocromático (Preto e Branco)", aplicar: (img) => img.grayscale() },
+            { nome: "⚫ Monocromático (Preto e Branco Extremo)", aplicar: (img) => img.grayscale().linear(1.3, -20) },
             { nome: "🧪 Cores Negativas (Invertidas)", aplicar: (img) => img.negate() },
-            { nome: "💧 Desfocado / Embaçado (Blur)", aplicar: (img) => img.blur(5) },
-            { nome: "🎨 Efeito Pintura (Mediana)", aplicar: (img) => img.median(4) },
+            { nome: "💧 Super Desfocado / Embaçado (Blur Máximo)", aplicar: (img) => img.blur(22) },
+            { nome: "🎨 Efeito Abstrato / Pintura Pesada", aplicar: (img) => img.median(12) },
             { 
-              nome: "👾 Pixelado (Mosaico Retro)", 
-              aplicar: (img) => img.resize(Math.floor(larguraOriginal * 0.08), Math.floor(alturaOriginal * 0.08), { kernel: 'nearest' }).resize(larguraOriginal, alturaOriginal, { kernel: 'nearest' }) 
+              nome: "👾 Ultra Pixelado (Mosaico 8-Bit)", 
+              aplicar: (img) => img.resize(Math.max(16, Math.floor(larguraOriginal * 0.035)), Math.max(12, Math.floor(alturaOriginal * 0.035)), { kernel: 'nearest' }).resize(larguraOriginal, alturaOriginal, { kernel: 'nearest' }) 
             },
-            { nome: "📺 Monitor CRT Antigo (Scanlines)", aplicar: (img) => img.linear(1.4, -40) },
-            { nome: "🎭 Super Contraste / Sombras Pesadas", aplicar: (img) => img.clahe({ width: 30, height: 30 }) },
-            { nome: "☀️ Efeito Solarização / Flash de Luz", aplicar: (img) => img.negate({ alpha: false }).linear(1.2, 10) }
+            { nome: "📺 Monitor CRT Corrompido (Cores Distorcidas)", aplicar: (img) => img.linear(2.2, -120) },
+            { nome: "🎭 Contraste Extremo / Sombras Psicotrópicas", aplicar: (img) => img.gamma(0.5).linear(2.0, -90) },
+            { nome: "☀️ Efeito Solarização / Radiação de Luz", aplicar: (img) => img.negate({ alpha: false }).linear(1.8, -30) }
           ];
 
           // Sorteia uma modificação da lista
@@ -166,8 +166,8 @@ export function execute(message) {
               height: alturaCorte,
             });
 
-          // Se NÃO for o filtro de pixelado, faz o resize padrão aqui (o pixelado precisa gerenciar o próprio resize)
-          if (modificacaoEscolhida.nome !== "👾 Pixelado (Mosaico Retro)") {
+          // Se NÃO for o filtro de pixelado, faz o resize padrão aqui
+          if (modificacaoEscolhida.nome !== "👾 Ultra Pixelado (Mosaico 8-Bit)") {
             pipelineSharp = pipelineSharp.resize(larguraOriginal, alturaOriginal);
           }
 
