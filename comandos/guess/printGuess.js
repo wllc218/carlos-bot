@@ -138,37 +138,46 @@ export function execute(message) {
             Math.random() * (alturaOriginal - alturaCorte),
           );
 
-          // 5. SISTEMA DE MODIFICAÇÕES ALEATÓRIAS (FILTROS)
+          // 5. NOVAS MODIFICAÇÕES INTERESSANTES (SEM INVERSÕES BANAIS)
           const listaModificacoes = [
             { nome: "Nenhum (Padrão)", aplicar: (img) => img },
-            { nome: "🔄 Invertido Horizontalmente", aplicar: (img) => img.flop() },
-            { nome: "🔀 Invertido Verticalmente", aplicar: (img) => img.flip() },
-            { nome: "⚫ Preto e Branco", aplicar: (img) => img.grayscale() },
+            { nome: "⚫ Monocromático (Preto e Branco)", aplicar: (img) => img.grayscale() },
             { nome: "🧪 Cores Negativas (Invertidas)", aplicar: (img) => img.negate() },
-            { nome: "💧 Levemente Borrado (Blur)", aplicar: (img) => img.blur(3) },
-            { nome: "🎨 Pintura a Óleo (Filtro Mediana)", aplicar: (img) => img.median(3) }
+            { nome: "💧 Desfocado / Embaçado (Blur)", aplicar: (img) => img.blur(5) },
+            { nome: "🎨 Efeito Pintura (Mediana)", aplicar: (img) => img.median(4) },
+            { 
+              nome: "👾 Pixelado (Mosaico Retro)", 
+              aplicar: (img) => img.resize(Math.floor(larguraOriginal * 0.08), Math.floor(alturaOriginal * 0.08), { kernel: 'nearest' }).resize(larguraOriginal, alturaOriginal, { kernel: 'nearest' }) 
+            },
+            { nome: "📺 Monitor CRT Antigo (Scanlines)", aplicar: (img) => img.linear(1.4, -40) },
+            { nome: "🎭 Super Contraste / Sombras Pesadas", aplicar: (img) => img.clahe({ width: 30, height: 30 }) },
+            { nome: "☀️ Efeito Solarização / Flash de Luz", aplicar: (img) => img.negate({ alpha: false }).linear(1.2, 10) }
           ];
 
           // Sorteia uma modificação da lista
           const modificacaoEscolhida = listaModificacoes[Math.floor(Math.random() * listaModificacoes.length)];
 
-          // Inicia a instância do Sharp com o recorte e o redimensionamento padrão
+          // Instancia o corte inicial
           let pipelineSharp = sharp(stdoutBuffer)
             .extract({
               left: xAleatorio,
               top: yAleatorio,
               width: larguraCorte,
               height: alturaCorte,
-            })
-            .resize(larguraOriginal, alturaOriginal);
+            });
 
-          // Aplica dinamicamente a modificação sorteada no pipeline
+          // Se NÃO for o filtro de pixelado, faz o resize padrão aqui (o pixelado precisa gerenciar o próprio resize)
+          if (modificacaoEscolhida.nome !== "👾 Pixelado (Mosaico Retro)") {
+            pipelineSharp = pipelineSharp.resize(larguraOriginal, alturaOriginal);
+          }
+
+          // Aplica dinamicamente a modificação sorteada
           pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp);
 
           const imagemComZoomBuffer = await pipelineSharp.toBuffer();
           const listaCategoriasTexto = ReduzirCategorias(categoriasDisponiveis);
 
-          // 6. ENVIA O DESAFIO NO CHAT INCLUINDO O NOME DA MODIFICAÇÃO
+          // 6. ENVIA O DESAFIO NO CHAT
           await message.reply({
             content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n✨ **Modificação desta rodada:** ${modificacaoEscolhida.nome}\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
             files: [
@@ -195,11 +204,9 @@ export function execute(message) {
             const respostaUsuario = msgPretendente.content.trim().toLowerCase();
             const respostaCorreta = videoSorteado.categoriaNome.toLowerCase();
 
-            // Resposta imediata se acertar
             if (respostaUsuario === respostaCorreta) {
               coletorChat.stop();
 
-              // Pontuação para quem acertou
               const user = await User.findById(msgPretendente.author.id);
               if (user && user.vitorias) {
                 user.vitorias.printGuess++;
@@ -207,7 +214,6 @@ export function execute(message) {
               }
 
               try {
-                // A resposta correta sempre envia a imagem original sem filtros para comparação
                 const imagemOriginalBuffer =
                   await sharp(stdoutBuffer).toBuffer();
 
@@ -231,7 +237,6 @@ export function execute(message) {
               }
             }
 
-            // Resposta imediata se errar
             if (
               categoriasDisponiveis
                 .map((c) => c.toLowerCase())
@@ -254,7 +259,6 @@ export function execute(message) {
     );
   }
 
-  // Envia a mensagem inicial de carregamento
   message.channel
     .send("🔄 CARGANDO .")
     .then((msgProcessando) => {
@@ -272,7 +276,6 @@ export function execute(message) {
     .catch(console.error);
 }
 
-// Helper para formatar a lista de categorias no chat
 function ReduzirCategorias(lista) {
   return lista.map((cat) => `• **${cat}**`).join("\n");
 }
