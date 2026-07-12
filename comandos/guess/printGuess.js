@@ -147,7 +147,7 @@ export function execute(message, args) {
                 const lo = largOrig || larguraOriginal;
                 const ao = altOrig || alturaOriginal;
                 
-                const larguraGrade = 24;
+                const larguraGrade = lc === lo ? 8 : 16;
                 const alturaGrade = Math.floor(larguraGrade * (ac / lc));
                 return img
                   .resize(larguraGrade, alturaGrade, { kernel: 'nearest' })
