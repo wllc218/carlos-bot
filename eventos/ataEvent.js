@@ -5,7 +5,7 @@ export async function execute(message) {
   if (message.author.bot) return;
   let sorte = Math.floor(Math.random() * falas.normal.length);
   let sorteio = Math.floor(Math.random() * 50);
-  if (sorteio <= 5) {
+  if (sorteio <= 2) {
     await message.reply(falas.normal[sorte]);
   }
 }
