@@ -138,16 +138,25 @@ export function execute(message) {
             Math.random() * (alturaOriginal - alturaCorte),
           );
 
-          // 5. MODIFICAÇÕES ULTRA INTENSAS (NÍVEL HARDCORE)
+          // 5. MODIFICAÇÕES ULTRA INTENSAS (ORDEM CORRIGIDA PARA RODAR NO RECORTE)
           const listaModificacoes = [
             { nome: "Nenhum (Padrão)", aplicar: (img) => img },
             { nome: "⚫ Monocromático (Preto e Branco Extremo)", aplicar: (img) => img.grayscale().linear(1.3, -20) },
             { nome: "🧪 Cores Negativas (Invertidas)", aplicar: (img) => img.negate() },
             { nome: "💧 Super Desfocado / Embaçado (Blur Máximo)", aplicar: (img) => img.blur(22) },
-            { nome: "🎨 Efeito Abstrato / Pintura Pesada", aplicar: (img) => img.median(12) },
+            { 
+              nome: "🎨 Efeito Abstrato / Pintura Pesada", 
+              aplicar: (img) => img.median(Math.max(15, Math.floor(larguraCorte * 0.08))) 
+            },
             { 
               nome: "👾 Ultra Pixelado (Mosaico 8-Bit)", 
-              aplicar: (img) => img.resize(Math.max(16, Math.floor(larguraOriginal * 0.035)), Math.max(12, Math.floor(alturaOriginal * 0.035)), { kernel: 'nearest' }).resize(larguraOriginal, alturaOriginal, { kernel: 'nearest' }) 
+              aplicar: (img) => {
+                const larguraGrade = 24;
+                const alturaGrade = Math.floor(larguraGrade * (alturaCorte / larguraCorte));
+                return img
+                  .resize(larguraGrade, alturaGrade, { kernel: 'nearest' })
+                  .resize(larguraOriginal, alturaOriginal, { kernel: 'nearest' });
+              }
             },
             { nome: "📺 Monitor CRT Corrompido (Cores Distorcidas)", aplicar: (img) => img.linear(2.2, -120) },
             { nome: "🎭 Contraste Extremo / Sombras Psicotrópicas", aplicar: (img) => img.gamma(0.5).linear(2.0, -90) },
@@ -166,13 +175,13 @@ export function execute(message) {
               height: alturaCorte,
             });
 
-          // Se NÃO for o filtro de pixelado, faz o resize padrão aqui
-          if (modificacaoEscolhida.nome !== "👾 Ultra Pixelado (Mosaico 8-Bit)") {
+          // APLICAÇÃO CIRÚRGICA DOS FILTROS E REDIMENSIONAMENTO
+          if (modificacaoEscolhida.nome === "👾 Ultra Pixelado (Mosaico 8-Bit)") {
+            pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp);
+          } else {
+            pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp);
             pipelineSharp = pipelineSharp.resize(larguraOriginal, alturaOriginal);
           }
-
-          // Aplica dinamicamente a modificação sorteada
-          pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp);
 
           const imagemComZoomBuffer = await pipelineSharp.toBuffer();
           const listaCategoriasTexto = ReduzirCategorias(categoriasDisponiveis);
