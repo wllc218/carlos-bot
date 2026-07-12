@@ -5,8 +5,17 @@ import videos from "../../data/videos.json" with { type: "json" };
 import User from "../../server/schemas/user-schema.js";
 
 export const name = "printguess";
-export function execute(message) {
-  // 1. MAPEIA AS CATEGORIAS E TRANSFORMA EM UMA LISTA ÚNICA DE VÍDEOS
+export function execute(message, args) {
+  // 1. DETERMINA O MODO DO JOGO (NORMAL POR PADRÃO, MODIFICADO SE DIGITAR 'modif')
+  // Exemplo de uso no Discord: !printguess modif ou !printguess norm
+  let modoJogo = "normal"; 
+  if (args && args[0]) {
+    const parametro = args[0].toLowerCase();
+    if (parametro === "modif") modoJogo = "modificado";
+    if (parametro === "norm") modoJogo = "normal";
+  }
+
+  // 2. MAPEIA AS CATEGORIAS E TRANSFORMA EM UMA LISTA ÚNICA DE VÍDEOS
   const categoriasDisponiveis = Object.keys(videos);
   const todosOsVideos = [];
 
@@ -44,11 +53,9 @@ export function execute(message) {
       todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
     const linkVideo = videoSorteado.url;
 
-    // Pega dados do JSON
     const fps = parseFloat(videoSorteado.fps);
     const duracao = parseFloat(videoSorteado.duracao);
 
-    // Validação de segurança
     if (isNaN(fps) || isNaN(duracao)) {
       console.error(
         `[Aviso] O vídeo ${videoSorteado.nome} não possui 'fps' ou 'duracao' configurados no JSON.`,
@@ -60,14 +67,10 @@ export function execute(message) {
       );
     }
 
-    // Calcula o total de frames aproximados e sorteia um frame específico
     const totalDeFrames = Math.floor(duracao * fps);
     const frameSorteado = Math.floor(Math.random() * totalDeFrames);
-
-    // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // OTIMIZAÇÃO MÁXIMA CORRIGIDA
     const ffmpegComando = `ffmpeg -y -threads 1 -noaccurate_seek -ss ${tempoEmSegundos} -probesize 150K -fflags +discardcorrupt -i "${linkVideo}" -vframes 1 -an -f image2pipe -vcodec mjpeg -`;
 
     // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
@@ -84,11 +87,6 @@ export function execute(message) {
           console.error(`Vídeo atual: ${videoSorteado.nome} (${linkVideo})`);
           console.error(`Tentativa: ${tentativas + 1}/5`);
           if (err2) console.error(`Detalhes do Erro do Node:`, err2.message);
-          if (stderrBuffer && stderrBuffer.length > 0) {
-            console.error(`Log do FFmpeg:\n${stderrBuffer.toString("utf8")}`);
-          }
-          console.error(`======================================================\n`);
-
           return processarVideo(
             msgProcessando,
             cronometroCarregando,
@@ -103,7 +101,7 @@ export function execute(message) {
 
           if (mediaBrilho < 25 || mediaBrilho > 230) {
             const tipoFrame = mediaBrilho < 25 ? "PRETO" : "BRANCO";
-            console.warn(`[Filtro de Qualidade] Frame ${tipoFrame} detectado no vídeo "${videoSorteado.nome}" (Brilho: ${mediaBrilho.toFixed(2)}).`);
+            console.warn(`[Filtro de Qualidade] Frame ${tipoFrame} detectado no vídeo "${videoSorteado.nome}".`);
             
             message.channel.send(`⚠️ **FRAME ${tipoFrame}** (Sorteando outro frame...)`).then((m) => {
               setTimeout(() => m.delete().catch(() => {}), 3000);
@@ -116,7 +114,6 @@ export function execute(message) {
             );
           }
 
-          // Lendo as dimensões reais direto da RAM via Sharp
           const metadata = await sharp(stdoutBuffer).metadata();
           const larguraOriginal = metadata.width;
           const alturaOriginal = metadata.height;
@@ -127,35 +124,34 @@ export function execute(message) {
 
           // 4. CÁLCULO DO ZOOM ALEATÓRIO
           const fatorZoom = 0.1 + Math.random() * 0.4;
-
           const larguraCorte = Math.floor(larguraOriginal * fatorZoom);
           const alturaCorte = Math.floor(alturaOriginal * fatorZoom);
 
-          const xAleatorio = Math.floor(
-            Math.random() * (larguraOriginal - larguraCorte),
-          );
-          const yAleatorio = Math.floor(
-            Math.random() * (alturaOriginal - alturaCorte),
-          );
+          const xAleatorio = Math.floor(Math.random() * (larguraOriginal - larguraCorte));
+          const yAleatorio = Math.floor(Math.random() * (alturaOriginal - alturaCorte));
 
-          // 5. MODIFICAÇÕES ULTRA INTENSAS (ORDEM CORRIGIDA PARA RODAR NO RECORTE)
+          // 5. BANCO DE MODIFICAÇÕES (SÓ SÃO USADAS NO MODO MODIFICADO)
           const listaModificacoes = [
-            { nome: "Nenhum (Padrão)", aplicar: (img) => img },
             { nome: "⚫ Monocromático (Preto e Branco Extremo)", aplicar: (img) => img.grayscale().linear(1.3, -20) },
             { nome: "🧪 Cores Negativas (Invertidas)", aplicar: (img) => img.negate() },
             { nome: "💧 Super Desfocado / Embaçado (Blur Máximo)", aplicar: (img) => img.blur(22) },
             { 
               nome: "🎨 Efeito Abstrato / Pintura Pesada", 
-              aplicar: (img) => img.median(Math.max(15, Math.floor(larguraCorte * 0.08))) 
+              aplicar: (img, largCorte) => img.median(Math.max(15, Math.floor((largCorte || larguraCorte) * 0.08))) 
             },
             { 
               nome: "👾 Ultra Pixelado (Mosaico 8-Bit)", 
-              aplicar: (img) => {
+              aplicar: (img, largCorte, altCorte, largOrig, altOrig) => {
+                const lc = largCorte || larguraCorte;
+                const ac = altCorte || alturaCorte;
+                const lo = largOrig || larguraOriginal;
+                const ao = altOrig || alturaOriginal;
+                
                 const larguraGrade = 24;
-                const alturaGrade = Math.floor(larguraGrade * (alturaCorte / larguraCorte));
+                const alturaGrade = Math.floor(larguraGrade * (ac / lc));
                 return img
                   .resize(larguraGrade, alturaGrade, { kernel: 'nearest' })
-                  .resize(larguraOriginal, alturaOriginal, { kernel: 'nearest' });
+                  .resize(lo, ao, { kernel: 'nearest' });
               }
             },
             { nome: "📺 Monitor CRT Corrompido (Cores Distorcidas)", aplicar: (img) => img.linear(2.2, -120) },
@@ -163,10 +159,13 @@ export function execute(message) {
             { nome: "☀️ Efeito Solarização / Radiação de Luz", aplicar: (img) => img.negate({ alpha: false }).linear(1.8, -30) }
           ];
 
-          // Sorteia uma modificação da lista
-          const modificacaoEscolhida = listaModificacoes[Math.floor(Math.random() * listaModificacoes.length)];
+          // Sorteia um efeito caso o modo seja modificado
+          let modificacaoEscolhida = { nome: "Nenhum (Padrão)", aplicar: (img) => img };
+          if (modoJogo === "modificado") {
+            modificacaoEscolhida = listaModificacoes[Math.floor(Math.random() * listaModificacoes.length)];
+          }
 
-          // Instancia o corte inicial
+          // Instancia o corte inicial para o desafio
           let pipelineSharp = sharp(stdoutBuffer)
             .extract({
               left: xAleatorio,
@@ -175,11 +174,11 @@ export function execute(message) {
               height: alturaCorte,
             });
 
-          // APLICAÇÃO CIRÚRGICA DOS FILTROS E REDIMENSIONAMENTO
+          // APLICAÇÃO CIRÚRGICA DOS FILTROS E REDIMENSIONAMENTO NO CORTE
           if (modificacaoEscolhida.nome === "👾 Ultra Pixelado (Mosaico 8-Bit)") {
-            pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp);
+            pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp, larguraCorte, alturaCorte, larguraOriginal, alturaOriginal);
           } else {
-            pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp);
+            pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp, larguraCorte);
             pipelineSharp = pipelineSharp.resize(larguraOriginal, alturaOriginal);
           }
 
@@ -188,7 +187,7 @@ export function execute(message) {
 
           // 6. ENVIA O DESAFIO NO CHAT
           await message.reply({
-            content: `🎮 **DESAFIO GAMER**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n✨ **Modificação desta rodada:** ${modificacaoEscolhida.nome}\n\n**CATEGORIAS:**\n${listaCategoriasTexto}\n\n`,
+            content: `🎮 **DESAFIO GAMER (${modoJogo.toUpperCase()})**\nQUAL O VÍDEO DA PRINT? DÊ O SEU PALPITE!\n\n✨ **Modificação desta rodada:** ${modificacaoEscolhida.nome}\n\n\n\n`,
             files: [
               {
                 attachment: imagemComZoomBuffer,
@@ -197,7 +196,6 @@ export function execute(message) {
             ],
           });
 
-          // Limpa o intervalo e apaga a mensagem de carregamento
           if (msgProcessando) {
             clearInterval(cronometroCarregando);
             msgProcessando.delete().catch(() => {});
@@ -205,9 +203,7 @@ export function execute(message) {
 
           // 7. COLETOR DE MENSAGENS INDEFINIDO
           const filtroChat = (m) => !m.author.bot;
-          const coletorChat = message.channel.createMessageCollector({
-            filter: filtroChat,
-          });
+          const coletorChat = message.channel.createMessageCollector({ filter: filtroChat });
 
           coletorChat.on("collect", async (msgPretendente) => {
             const respostaUsuario = msgPretendente.content.trim().toLowerCase();
@@ -223,34 +219,49 @@ export function execute(message) {
               }
 
               try {
-                const imagemOriginalBuffer =
-                  await sharp(stdoutBuffer).toBuffer();
+                let imagemOriginalBuffer;
+
+                // SE FOR MODIFICADO, RENDERIZA A IMAGEM COMPLETA COM O FILTRO APLICADO
+                if (modoJogo === "modificado") {
+                  let pipelineFinal = sharp(stdoutBuffer);
+
+                  if (modificacaoEscolhida.nome === "👾 Ultra Pixelado (Mosaico 8-Bit)") {
+                    // No caso do pixelado completo, passamos as dimensões originais como se fossem o "corte" para estourar tudo de forma macro
+                    imagemOriginalBuffer = await modificacaoEscolhida.aplicar(
+                      pipelineFinal, 
+                      larguraOriginal, 
+                      alturaOriginal, 
+                      larguraOriginal, 
+                      alturaOriginal
+                    ).toBuffer();
+                  } else {
+                    // Para os outros filtros, aplica e garante o tamanho final
+                    pipelineFinal = modificacaoEscolhida.aplicar(pipelineFinal, larguraOriginal);
+                    imagemOriginalBuffer = await pipelineFinal.resize(larguraOriginal, alturaOriginal).toBuffer();
+                  }
+                } else {
+                  // MODO NORMAL: Envia a imagem limpa e original
+                  imagemOriginalBuffer = await sharp(stdoutBuffer).toBuffer();
+                }
 
                 return message.channel.send({
                   content: `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
                   files: [
                     {
                       attachment: imagemOriginalBuffer,
-                      name: "resposta_original.png",
+                      name: modoJogo === "modificado" ? "resposta_modificada.png" : "resposta_original.png",
                     },
                   ],
                 });
               } catch (errResposta) {
-                console.error(
-                  "[Erro Sharp] Falha ao gerar imagem de resposta:",
-                  errResposta,
-                );
+                console.error("[Erro Sharp] Falha ao gerar imagem de resposta:", errResposta);
                 return message.channel.send(
                   `🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**\n• Vídeo original: **${videoSorteado.nome}**\n• Frame exato: **#${frameSorteado}**`,
                 );
               }
             }
 
-            if (
-              categoriasDisponiveis
-                .map((c) => c.toLowerCase())
-                .includes(respostaUsuario)
-            ) {
+            if (categoriasDisponiveis.map((c) => c.toLowerCase()).includes(respostaUsuario)) {
               msgPretendente.reply("❌ ERROU!").then((m) => {
                 setTimeout(() => m.delete().catch(() => {}), 2500);
               });
@@ -258,11 +269,7 @@ export function execute(message) {
           });
         } catch (errSharp) {
           console.error("[Erro Sharp] Falha ao aplicar filtros/zoom:", errSharp);
-          return processarVideo(
-            msgProcessando,
-            cronometroCarregando,
-            tentativas + 1,
-          );
+          return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
         }
       },
     );
@@ -272,11 +279,9 @@ export function execute(message) {
     .send("🔄 CARGANDO .")
     .then((msgProcessando) => {
       let pontos = 1;
-
       const cronometroCarregando = setInterval(async () => {
         pontos++;
         const sufixoPontos = " .".repeat(pontos);
-
         await msgProcessando.edit(`🔄 CARGANDO${sufixoPontos}`).catch(() => {});
       }, 1000);
 
