@@ -67,19 +67,19 @@ export function execute(message) {
     // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // OTIMIZAÇÃO MÁXIMA DE VELOCIDADE:
-    // -threads 1 evita overhead de CPU para um único frame
-    // -skip_frame nokey pula a decodificação de frames desnecessários na rede
-    // -fflags +discardcorrupt ignora pacotes ruins sem travar o download
-    const ffmpegComando = `ffmpeg -y -threads 1 -skip_frame nokey -ss ${tempoEmSegundos} -probesize 150K -fflags +discardcorrupt -i "${linkVideo}" -vframes 1 -an -f image2pipe -vcodec mjpeg -`;
+    // OTIMIZAÇÃO MÁXIMA CORRIGIDA:
+    // -threads 1 evita overhead de CPU
+    // -noaccurate_seek faz a busca remota instantânea sem precisar decodificar tudo
+    // -fflags +discardcorrupt ignora micro-falhas de transmissão na rede do Catbox
+    const ffmpegComando = `ffmpeg -y -threads 1 -noaccurate_seek -ss ${tempoEmSegundos} -probesize 150K -fflags +discardcorrupt -i "${linkVideo}" -vframes 1 -an -f image2pipe -vcodec mjpeg -`;
 
     // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
     exec(
       ffmpegComando,
       {
         encoding: "buffer",
-        maxBuffer: 1024 * 1024 * 60, // 60MB
-        timeout: 12000, 
+        maxBuffer: 1024 * 1024 * 60, // 60MB para evitar estouros de buffer
+        timeout: 12000, // 12 segundos para lidar com eventuais lentidões de handshake
       },
       async (err2, stdoutBuffer, stderrBuffer) => {
         if (err2 || !stdoutBuffer || stdoutBuffer.length === 0) {
