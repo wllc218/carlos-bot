@@ -11,7 +11,6 @@ export async function execute(message) {
     const totalB = Object.values(b.vitorias).reduce(total);
     return totalB - totalA;
   });
-
   let soma = 0;
   ranking.forEach((rank) => {
     soma += 1;
