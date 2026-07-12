@@ -30,13 +30,13 @@ export function execute(message) {
     cronometroCarregando,
     tentativas = 0,
   ) {
-    if (tentativas >= 3) {
+    if (tentativas >= 5) {
       if (msgProcessando) {
         clearInterval(cronometroCarregando);
         msgProcessando.delete().catch(() => {});
       }
       return message.reply(
-        "❌ Ocorreram erros seguidos ao tentar processar os frames dos vídeos.",
+        "❌ Ocorreram erros ou frames inválidos seguidos ao tentar processar os vídeos.",
       );
     }
 
@@ -44,7 +44,7 @@ export function execute(message) {
       todosOsVideos[Math.floor(Math.random() * todosOsVideos.length)];
     const linkVideo = videoSorteado.url;
 
-    // Pega dados do JSON (Aproveitando os metadados fixos para acelerar)
+    // Pega dados do JSON
     const fps = parseFloat(videoSorteado.fps);
     const duracao = parseFloat(videoSorteado.duracao);
 
@@ -67,10 +67,7 @@ export function execute(message) {
     // Transforma o frame sorteado em segundos exatos
     const tempoEmSegundos = (frameSorteado / fps).toFixed(3);
 
-    // OTIMIZAÇÃO MÁXIMA CORRIGIDA:
-    // -threads 1 evita overhead de CPU
-    // -noaccurate_seek faz a busca remota instantânea sem precisar decodificar tudo
-    // -fflags +discardcorrupt ignora micro-falhas de transmissão na rede do Catbox
+    // OTIMIZAÇÃO MÁXIMA CORRIGIDA
     const ffmpegComando = `ffmpeg -y -threads 1 -noaccurate_seek -ss ${tempoEmSegundos} -probesize 150K -fflags +discardcorrupt -i "${linkVideo}" -vframes 1 -an -f image2pipe -vcodec mjpeg -`;
 
     // 3. EXTRAI O FRAME ESPECÍFICO NA MEMÓRIA RAM
@@ -78,14 +75,14 @@ export function execute(message) {
       ffmpegComando,
       {
         encoding: "buffer",
-        maxBuffer: 1024 * 1024 * 60, // 60MB para evitar estouros de buffer
-        timeout: 12000, // 12 segundos para lidar com eventuais lentidões de handshake
+        maxBuffer: 1024 * 1024 * 60, // 60MB
+        timeout: 12000, 
       },
       async (err2, stdoutBuffer, stderrBuffer) => {
         if (err2 || !stdoutBuffer || stdoutBuffer.length === 0) {
           console.error(`\n============ [ERRO IMPREVISTO NO FFmpeg] ============`);
           console.error(`Vídeo atual: ${videoSorteado.nome} (${linkVideo})`);
-          console.error(`Tentativa: ${tentativas + 1}/3`);
+          console.error(`Tentativa: ${tentativas + 1}/5`);
           if (err2) console.error(`Detalhes do Erro do Node:`, err2.message);
           if (stderrBuffer && stderrBuffer.length > 0) {
             console.error(`Log do FFmpeg:\n${stderrBuffer.toString("utf8")}`);
@@ -100,6 +97,25 @@ export function execute(message) {
         }
 
         try {
+          // ANALISA SE O FRAME É PRETO/ESCURO ANTES DE CONTINUAR
+          const stats = await sharp(stdoutBuffer).stats();
+          const mediaBrilho = (stats.channels[0].mean + stats.channels[1].mean + stats.channels[2].mean) / 3;
+
+          // CORRIGIDO: Agora avisa "FRAME PRETO" no chat e deleta o aviso depois de 3 segundos
+          if (mediaBrilho < 25) {
+            console.warn(`[Filtro Anti-Breu] Frame escuro detectado no vídeo "${videoSorteado.nome}".`);
+            
+            message.channel.send("⚠️ **FRAME PRETO** (Sorteando outro frame...)").then((m) => {
+              setTimeout(() => m.delete().catch(() => {}), 3000);
+            });
+
+            return processarVideo(
+              msgProcessando,
+              cronometroCarregando,
+              tentativas + 1,
+            );
+          }
+
           // Lendo as dimensões reais direto da RAM via Sharp
           const metadata = await sharp(stdoutBuffer).metadata();
           const larguraOriginal = metadata.width;
