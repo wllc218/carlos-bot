@@ -226,19 +226,17 @@ export function execute(message, args) {
           let pipelineSharp = sharp(stdoutBuffer)
             .extract({ left: xAleatorio, top: yAleatorio, width: larguraCorte, height: alturaCorte });
 
-          // Aplicação e redimensionamento estruturado no corte
+          // CORREÇÃO CRÍTICA AQUI: Usar await para resolver as funções assíncronas dos filtros!
           if (modificacaoEscolhida.nome === "👾 Ultra Pixelado (Mosaico 8-Bit)") {
             pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp, larguraCorte, alturaCorte, larguraOriginal, alturaOriginal);
           } else if (modificacaoEscolhida.nome === "🪟 Efeito Vidro Canelado (Textura de Vitral)") {
             pipelineSharp = modificacaoEscolhida.aplicar(pipelineSharp, larguraCorte);
           } else {
-            const resMod = modificacaoEscolhida.aplicar(pipelineSharp, larguraCorte, alturaCorte, larguraOriginal, alturaOriginal);
-            pipelineSharp = (resMod instanceof Promise ? await resMod : resMod);
-            // Garante o redimensionamento final se o filtro já não tiver tratado as dimensões nativamente
-            const metaAtual = await pipelineSharp.metadata();
-            if (metaAtual.width !== larguraOriginal || metaAtual.height !== alturaOriginal) {
-              pipelineSharp = pipelineSharp.resize(larguraOriginal, alturaOriginal);
-            }
+            // Se o filtro retornar uma Promise, espera ela resolver antes de aplicar o .resize()
+            const resultadoFiltro = modificacaoEscolhida.aplicar(pipelineSharp, larguraCorte, alturaCorte, larguraOriginal, alturaOriginal);
+            pipelineSharp = (resultadoFiltro instanceof Promise) ? await resultadoFiltro : resultadoFiltro;
+            
+            pipelineSharp = pipelineSharp.resize(larguraOriginal, alturaOriginal);
           }
 
           const imagemComZoomBuffer = await pipelineSharp.toBuffer();
@@ -255,17 +253,21 @@ export function execute(message, args) {
             msgProcessando.delete().catch(() => {});
           }
 
-          // Helper robusto para gerar a imagem final na revelação (Reaplica efeitos na escala macro se modificado)
+          // Helper robusto para gerar a imagem final na revelação (com tratamento de Promise)
           async function gerarImagemResposta() {
             if (modoJogo === "modificado") {
               let pipelineFinal = sharp(stdoutBuffer);
               if (modificacaoEscolhida.nome === "👾 Ultra Pixelado (Mosaico 8-Bit)") {
-                return await modificacaoEscolhida.aplicar(pipelineFinal, larguraOriginal, alturaOriginal, larguraOriginal, alturaOriginal).toBuffer();
+                const res = modificacaoEscolhida.aplicar(pipelineFinal, larguraOriginal, alturaOriginal, larguraOriginal, alturaOriginal);
+                const resolvida = (res instanceof Promise) ? await res : res;
+                return await resolvida.toBuffer();
               } else if (modificacaoEscolhida.nome === "🪟 Efeito Vidro Canelado (Textura de Vitral)") {
-                return await modificacaoEscolhida.aplicar(pipelineFinal, larguraOriginal).toBuffer();
+                const res = modificacaoEscolhida.aplicar(pipelineFinal, larguraOriginal);
+                const resolvida = (res instanceof Promise) ? await res : res;
+                return await resolvida.toBuffer();
               } else {
-                const resFinal = modificacaoEscolhida.aplicar(pipelineFinal, larguraOriginal, alturaOriginal, larguraOriginal, alturaOriginal);
-                let resolvida = (resFinal instanceof Promise ? await resFinal : resFinal);
+                const res = modificacaoEscolhida.aplicar(pipelineFinal, larguraOriginal, alturaOriginal, larguraOriginal, alturaOriginal);
+                const resolvida = (res instanceof Promise) ? await res : res;
                 return await resolvida.resize(larguraOriginal, alturaOriginal).toBuffer();
               }
             } else {
@@ -294,7 +296,7 @@ export function execute(message, args) {
                   files: [{ attachment: imagemRevelada, name: "resposta_revelada.png" }],
                 });
               } catch (errDesisto) {
-                console.error(errDesisto);
+                console.error("[Erro Desisto]", errDesisto);
                 return message.channel.send(`💡 **Gabarito do Desafio:** Categoria **${videoSorteado.categoriaNome}** (${videoSorteado.nome})`);
               }
             }
@@ -316,6 +318,7 @@ export function execute(message, args) {
                   files: [{ attachment: imagemOriginalBuffer, name: "resposta.png" }],
                 });
               } catch (errResposta) {
+                console.error("[Erro Acerto]", errResposta);
                 return message.channel.send(`🎉 **PARABÉNS!** <@${msgPretendente.author.id}> \n• Categoria: **${videoSorteado.categoriaNome}**`);
               }
             }
@@ -328,7 +331,7 @@ export function execute(message, args) {
             }
           });
         } catch (errSharp) {
-          console.error("[Erro Sharp]", errSharp);
+          console.error("[Erro no Bloco Principal do Sharp]:", errSharp);
           return processarVideo(msgProcessando, cronometroCarregando, tentativas + 1);
         }
       },
@@ -347,7 +350,6 @@ export function execute(message, args) {
   }).catch(console.error);
 }
 
-//oiii entao
 function ReduzirCategorias(lista) {
   return lista.map((cat) => `• **${cat}**`).join("\n");
 }
