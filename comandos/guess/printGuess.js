@@ -347,6 +347,7 @@ export function execute(message, args) {
   }).catch(console.error);
 }
 
+//oiii entao
 function ReduzirCategorias(lista) {
   return lista.map((cat) => `• **${cat}**`).join("\n");
 }
